@@ -1,18 +1,11 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const Book = require("./models/Book");
+const booksRouter = require('./routes/books');
 require("dotenv").config();
 
 const app = express();
 
-app.get('/books', async (req, res)=>{
-    try{
-        const data = await Book.find().limit(10);
-        res.json(data)
-    }
-    catch(error){
-        res.status(500).json({message: error.message})
-    }});
+app.use('/api', booksRouter);
 
 mongoose
   .connect(process.env.MONGODB_URI, {
