@@ -13,10 +13,11 @@ mongoose
     useUnifiedTopology: true,
   })
   .then(async () => {
-    const port = process.env.PORT || 3000;
+    const port = process.env.PORT || 8000;
+    const dbHost = process.env.DB_HOST || localhost;
 
     app.listen(port, () => {
-      console.log(`http://localhost:${port}`);
+      console.log(`http://${dbHost}:${port}`);
       console.log(`Server listening on port ${port}`);
     });
   })
