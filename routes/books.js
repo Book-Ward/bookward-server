@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router()
 const {
     getGreatestBooks
-} = require("../controllers/books")
+} = require("../controllers/booksController")
 
 router.get('/books', getGreatestBooks);
 

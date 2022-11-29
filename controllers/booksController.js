@@ -1,6 +1,6 @@
-const Book = require("../models/Book");
+const Book = require("../models/book");
 
-const getGreatestBooks = async (req, res)=> {
+const getHighestRatedBooks = async (req, res)=> {
     const minNumRatings = 1000000;
 
     try{
@@ -16,5 +16,5 @@ const getGreatestBooks = async (req, res)=> {
     }};
 
 module.exports = {
-    getGreatestBooks
+    getGreatestBooks: getHighestRatedBooks
 }
