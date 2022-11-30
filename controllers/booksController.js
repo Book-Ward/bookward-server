@@ -1,15 +1,25 @@
 const Book = require("../models/book");
 
 const getHighestRatedBooks = async (req, res) => {
-    const minNumRatings = 1000000;
+    const minNumRatings = 500000;
 
     try{
         // Where number of rating are greater or
         // equal and sorting by ascending order
         const data = await Book.find( { numRatings: { $gte:  minNumRatings} } )
-        .sort({rating: -1}).limit(10);
+        .sort({rating: -1})
+        .limit(150);
 
-        res.status(200).json(data);
+        // TODO: export to method
+        const filteredData = data.map((datum) => {
+            return {
+            '_id':datum._id,
+            'title':datum.title,
+            'coverImg': datum.coverImg
+            }
+        });;
+
+        res.status(200).json(filteredData);
     }
     catch(error){
         res.status(500).json({message: error.message});
@@ -26,8 +36,32 @@ const getBookInfo = async (req, res) => {
     };
 }
 
+const getBookByName = async (req, res) => {
+    try{
+        
+        const data = await Book.find({title: {'$regex': req.body.title.toString(),$options:'i'}})
+        .sort({ numRatings: -1 })
+        .limit(10);
+        
+        // TODO: export to method
+       const filteredData = data.map((datum) => {
+            return {
+            '_id':datum._id,
+            'title':datum.title,
+            'coverImg': datum.coverImg
+            }
+        });;
+
+        res.status(200).json(filteredData);
+    }
+    catch(error){
+        res.status(500).json({message: error.message});
+    };
+}
+
 module.exports = {
     getGreatestBooks: getHighestRatedBooks,
     getBookInfo: getBookInfo,
+    getBookByName: getBookByName
 }
 
