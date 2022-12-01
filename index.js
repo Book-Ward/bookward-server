@@ -1,9 +1,35 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors");
 const booksRouter = require('./routes/books');
 require("dotenv").config();
 
 const app = express();
+
+app.use(
+  cors({
+    origin: [
+      process.env.CLIENT_APP_URL,
+    ],
+    credentials: true,
+  })
+);
+
+app.use((req, res, next) => {
+  const allowedOrigins = [
+    process.env.CLIENT_APP_URL,
+  ];
+  const origin = req.headers.origin;
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  } else {
+    res.setHeader("Access-Control-Allow-Origin", false);
+  }
+  res.header("Access-Control-Allow-Headers", true);
+  res.header("Access-Control-Allow-Credentials", "Content-Type");
+  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, PATCH, DELETE");
+  next();
+});
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));

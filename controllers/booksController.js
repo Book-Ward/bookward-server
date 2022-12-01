@@ -52,6 +52,8 @@ const getBookByName = async (req, res) => {
             }
         });;
 
+        console.log("Found " + filteredData.length + " mathes for query: " + req.body.title.toString())
+
         res.status(200).json(filteredData);
     }
     catch(error){
