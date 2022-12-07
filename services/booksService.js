@@ -4,13 +4,10 @@ const getHighestRatedBooks = async (req, res) => {
     const minNumRatings = 500000;
 
     try{
-        // Where number of rating are greater or
-        // equal and sorting by ascending order
         const data = await Book.find( { numRatings: { $gte:  minNumRatings} } )
         .sort({rating: -1})
         .limit(150);
 
-        // TODO: export to method
         const filteredData = data.map((datum) => {
             return {
             '_id':datum._id,
@@ -59,7 +56,7 @@ const getBookByName = async (req, res) => {
     catch(error){
         res.status(500).json({message: error.message});
     };
-}
+}  
 
 module.exports = {
     getGreatestBooks: getHighestRatedBooks,

@@ -4,7 +4,7 @@ const {
     getGreatestBooks,
     getBookInfo,
     getBookByName
-} = require("../controllers/booksController")
+} = require("../services/booksService")
 
 router.get('/books', getGreatestBooks);
 router.get('/book/:bookId', getBookInfo);
