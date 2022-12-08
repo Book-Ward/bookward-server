@@ -7,8 +7,10 @@ const getUserInfo = async (req, res) => {
         const user = await User.find( { userId: userId } );
 
         if (!user.length) {
-            const newUser = await User.create( { userId: userId } );
-            
+            const email = req.body.email.toString();
+
+            const newUser = await User.create( { userId: userId, email: email } );
+
             res.status(200).json(newUser);
 
         } else {

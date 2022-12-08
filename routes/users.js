@@ -4,6 +4,6 @@ const {
     getUserInfo
 } = require("../services/userService")
 
-router.get("/users/:userId", getUserInfo);
+router.post("/users/:userId", getUserInfo);
 
 module.exports = router;
