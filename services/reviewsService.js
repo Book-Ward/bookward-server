@@ -15,7 +15,7 @@ const postBookReview = async (req, res) => {
     try {
         const data = await Review.create(req.body);
 
-        const user = await User.find( { userId: data.userId.toString() } );
+        const user = await User.find( { userId: req.body.userId.toString() } );
 
         if (!user.length) {
             res.status(400).json( { message: "User was not found" } );

@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const cors = require("cors");
 const booksRouter = require('./routes/books');
 const reviewsRouter = require('./routes/reviews');
+const userRouter = require('./routes/users');
 require("dotenv").config();
 
 const app = express();
@@ -34,8 +35,7 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use('/api', booksRouter);
-app.use('/api', reviewsRouter);
+app.use('/api', booksRouter, reviewsRouter, userRouter);
 
 mongoose
   .connect(process.env.MONGODB_URI, {
