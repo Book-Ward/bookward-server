@@ -1,5 +1,6 @@
 const Book = require("../models/book");
 const Review = require("../models/review");
+const { getReviewsByBookId } = require("./reviewsService");
 
 const getHighestRatedBooks = async (req, res) => {
     const minNumRatings = 500000;
@@ -29,8 +30,8 @@ const getBookInfo = async (req, res) => {
     try{
         const data = await Book.findById(req.params.bookId.toString());
 
-        const reviews = await Review.find( { bookId: req.params.bookId.toString() } );
-        console.log(reviews)
+        const reviews = await getReviewsByBookId(req.params.bookId.toString());
+
         res.status(200).json({bookInfo: data, reviews: reviews});
     }
     catch(error){

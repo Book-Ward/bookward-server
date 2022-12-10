@@ -1,6 +1,8 @@
 const User = require("../models/user");
 
 const getUserInfo = async (req, res) => {
+    console.log("getUserInfo: " + req.params.userId.toString());
+
     try {
         const userId = req.params.userId.toString();
 

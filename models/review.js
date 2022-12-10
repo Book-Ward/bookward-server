@@ -3,6 +3,7 @@ const { model, Schema } = require("mongoose");
 const reviewSchema = new Schema({
     bookId: String,
     userId: String,
+    author: String,
     rating: Number,
     content: String,
     date: {
