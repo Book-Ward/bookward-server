@@ -1,8 +1,14 @@
 const { model, Schema } = require("mongoose");
 
 const reviewSchema = new Schema({
-    bookId: String,
-    userId: String,
+    bookId: {
+        type: Schema.Types.ObjectId,
+        ref: "Book",
+    },
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+    },
     author: String,
     rating: Number,
     content: String,

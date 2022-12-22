@@ -5,11 +5,23 @@ var userSchema = new Schema({
   email: { type: String, required: true, unique: true },
   bio: { type: String, required: false },
   profileImg: { type: String, required: false },
-  followers: { type: Array, required: false },
-  following: { type: Array, required: false },
-  savedBooks: { type: Array, required: false },
+  followers: [{ 
+    type: Schema.Types.ObjectId,
+    ref: "User", 
+  }],
+  following: [{ 
+    type: Schema.Types.ObjectId,
+    ref: "User", 
+  }],
+  savedBooks: [{
+     type: Schema.Types.ObjectId,
+     ref: "Book"
+  }],
   upvotedReviews: { type: Array, required: false },
-  reviews: { type: Array, required: false },
+  reviews: [{ 
+    type: Schema.Types.ObjectId,
+    ref: "Review", 
+  }],
   created: { type: Date, default: Date.now },
 });
 

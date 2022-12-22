@@ -9,8 +9,12 @@ const bookSchema = new Schema({
     type: String,
     default: "",
   },
+  visited: {
+    type: Number,
+    default: 0,
+  },
   language: String,
-  isbn: Number,
+  isbn: String,
   genres: Array,
   characters: {
     type: Array,
