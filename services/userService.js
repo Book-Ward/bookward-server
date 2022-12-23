@@ -25,21 +25,21 @@ const getUserInfo = async (req, res) => {
 
 const saveBook = async (req, res) => {
     try {
-        const user = await User.find( { userId: req.body.userId.toString() } );
+        const user = await User.findOne( { userId: req.body.userId.toString() } );
 
-        if (!user.length) {
-            res.status(500).json( { message: "User not found" } );
+        const book = await Book.findById(req.body.bookId.toString());
+
+        if (!book) {
+            res.status(500).json( { success: false, message: "Book not found" } );
         } else {
-            const book = await Book.findById(req.body.bookId.toString());
-
-            if (!book) {
-                res.status(500).json( { message: "Book not found" } );
+            if (user.savedBooks.includes(book._id)) {
+                res.status(500).json( { success: false, message: "Book already saved" } );
             } else {
-                user.savedBooks.push(book);
-    
-                await user.save();
-    
-                res.status(200).json(user);
+                user.savedBooks.push(book._id);
+
+                await user.save();    
+
+                res.status(200).json( { success: true, data: user } )
             }
         }
     }

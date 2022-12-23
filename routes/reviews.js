@@ -1,6 +1,11 @@
 const express = require('express');
 const router = express.Router()
 const {
+    userMiddleware,
+    reviewMiddleware,
+    reviewOwnershipMiddleware
+} = require("../middlewares/middleware")
+const {
     getBookReviews,
     postBookReview,
     deleteBookReview,
@@ -8,8 +13,8 @@ const {
 } = require("../services/reviewsService")
 
 router.get("/reviews/:bookId", getBookReviews);
-router.post("/reviews", postBookReview);
-router.delete("/reviews/:bookId", deleteBookReview);
-router.put("/reviews/:bookId", upvoteBookReview);
+router.post("/reviews", userMiddleware, postBookReview);
+router.delete("/reviews/:bookId", reviewOwnershipMiddleware, deleteBookReview);
+router.put("/reviews/upvote/:reviewId", reviewMiddleware, upvoteBookReview);
 
 module.exports = router;

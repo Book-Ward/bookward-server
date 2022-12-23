@@ -4,13 +4,13 @@ const User = require("../models/user");
 const getReviewsByBookId = async (bookId) => {
     const data = await Review.find( { bookId: bookId } )
     .sort( { date: -1 } )
+    .populate('userId')
     .limit(20);
 
     return data;
 }
 
 const getBookReviews = async (req, res) => {
-    console.log("Hit!")
     try {
         const data = await getReviewsByBookId(req.params.bookId.toString());
 
@@ -23,25 +23,20 @@ const getBookReviews = async (req, res) => {
 
 const postBookReview = async (req, res) => {
     try {
-        const user = await User.find( { userId: req.body.userId.toString() } );        
-
-        if (!user.length) {
-            res.status(400).json( { message: "User was not found" } );
-            
-            return;
-        } 
+        const user = await User.findOne( { userId: req.body.userId.toString() } );        
 
         const expandedData = {
             ...req.body,
-            author: user[0].email,
+            userId: user._id,
             date: Date.now()
         };
+    
+        const createdReview = await (await Review.create(expandedData)).populate('userId');
 
-        console.log(expandedData);
+        user.reviews.push(createdReview._id);
+        user.save();
 
-        const data = await Review.create(expandedData);
-
-        res.status(200).json(data);    
+        res.status(200).json(createdReview); 
     }
     catch(error) {
         res.status(500).json( { message: error.message } );
@@ -50,20 +45,9 @@ const postBookReview = async (req, res) => {
 
 const deleteBookReview = async (req, res) => {
     try {
-        const review = await Review.findById(req.params.bookId.toString());
+        const data = await Review.findByIdAndDelete(req.params.bookId.toString());
 
-        if (!review.length) {
-            res.status(400).json( { message: "Review was not found" } );
-        }
-
-        if (review.userId.toString() !== req.body.userId.toString()) {
-            res.status(400).json( { message: "User is not authorized to delete this review" } );
-        }
-        
-        else {
-            const data = await Review.findByIdAndDelete(req.params.bookId.toString());
-            res.status(200).json(data);
-        }
+        res.status(200).json(data);
     }
     catch(error){
         res.status(500).json( { message: error.message } );
@@ -72,11 +56,7 @@ const deleteBookReview = async (req, res) => {
 
 const upvoteBookReview = async (req, res) => {
     try {
-        const review = await Review.findById(req.params.bookId.toString());
-
-        if (!review.length) {
-            res.status(400).json( { message: "Review was not found" } );
-        }
+        const review = await Review.findOne(req.params.reviewId.toString());
 
         const user = await User.find( { userId: req.body.userId.toString() } );
 
@@ -85,7 +65,7 @@ const upvoteBookReview = async (req, res) => {
         }
 
         else {
-            const data = await Review.findByIdAndUpdate(req.params.bookId.toString(), { $inc: {helpful: 1} } );
+            const data = await Review.findByIdAndUpdate(req.params.reviewId.toString(), { $inc: {helpful: 1} } );
             res.status(200).json(data);
         }
     }
