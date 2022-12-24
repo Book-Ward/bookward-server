@@ -8,7 +8,7 @@ const {
     saveBook
 } = require("../services/userService")
 
-router.post("/users/:userId", getUserInfo);
+router.post("/users/:userId", userMiddleware, getUserInfo);
 router.post("/saveBook", userMiddleware, saveBook);
 
 module.exports = router;
