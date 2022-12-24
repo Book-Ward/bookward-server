@@ -4,17 +4,15 @@ const {
     bookMiddleware,
 } = require("../middlewares/middleware")
 const {
-    getGreatestBooks,
     getBookInfo,
     getBookByName,
     getFeaturedBooks,
-    getPersonalizedBooks
+    getPopularBooks
 } = require("../services/booksService")
 
-router.get('/books/', getGreatestBooks);
-router.get('/books/:userId', getPersonalizedBooks);
-router.get('/books/featured', getFeaturedBooks);
+router.get('/books/:userId', getPopularBooks);
+router.get('/featured/:userId', getFeaturedBooks);
 router.get('/book/:bookId', bookMiddleware, getBookInfo);
-router.post('/book/search', getBookByName);
+router.post('/book/search/:userId', getBookByName);
 
 module.exports = router;

@@ -5,7 +5,8 @@ const getUserInfo = async (req, res) => {
     try {
         const userId = req.params.userId.toString();
 
-        const user = await User.find( { userId: userId } );
+        const user = await User.find( { userId: userId } )
+                               .populate("savedBooks reviews");
 
         res.status(200).json(user);
         

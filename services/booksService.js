@@ -2,23 +2,7 @@ const Book = require("../models/book");
 const User = require("../models/user");
 const { getReviewsByBookId } = require("./reviewsService");
 
-const getHighestRatedBooks = async (req, res) => {
-    const minNumRatings = 500000;
-
-    try{
-        const data = await Book.find( { numRatings: { $gte:  minNumRatings} } )
-        .sort({rating: -1})
-        .limit(24)
-        .select('_id title coverImg genres');
-
-        res.status(200).json(data);
-    }
-    catch(error){
-        res.status(500).json({message: error.message});
-    }
-};
-
-const getPersonalizedBooks = async (req, res) => {
+const getPopularBooks = async (req, res) => {
     const minNumRatings = 500000;
 
     try{
@@ -28,7 +12,6 @@ const getPersonalizedBooks = async (req, res) => {
         .select('_id title coverImg genres');
 
         const user = await User.findOne( { userId: req.params?.userId?.toString() } );
-
         if (user) {
             const savedBooks = user.savedBooks;
             data.forEach((book, idx) => {
@@ -53,6 +36,18 @@ const getFeaturedBooks = async (req, res) => {
         .sort( { visited: -1, rating: -1 } )
         .limit(3)
         .select('_id title coverImg genres');
+
+        const user = await User.findOne( { userId: req.params?.userId?.toString() } );
+        if (user) {
+            const savedBooks = user.savedBooks;
+            data.forEach((book, idx) => {
+                if (savedBooks.includes(book._id.toString())) {
+                    data[idx] = { ...book._doc, liked: true };
+                } else {
+                    data[idx] = { ...book._doc, liked: false };
+                }
+            });
+        }
 
         res.status(200).json(data);
     }
@@ -90,6 +85,18 @@ const getBookByName = async (req, res) => {
         .select('_id title coverImg');
 
         console.log("Found " + data.length + " mathes for query: " + req.body.title.toString())
+        
+        const user = await User.findOne( { userId: req.params?.userId?.toString() } );
+        if (user) {
+            const savedBooks = user.savedBooks;
+            data.forEach((book, idx) => {
+                if (savedBooks.includes(book._id.toString())) {
+                    data[idx] = { ...book._doc, liked: true };
+                } else {
+                    data[idx] = { ...book._doc, liked: false };
+                }
+            });
+        }
 
         res.status(200).json(data);
     }
@@ -99,10 +106,9 @@ const getBookByName = async (req, res) => {
 }  
 
 module.exports = {
-    getGreatestBooks: getHighestRatedBooks,
     getBookInfo: getBookInfo,
     getBookByName: getBookByName,
     getFeaturedBooks: getFeaturedBooks,
-    getPersonalizedBooks: getPersonalizedBooks
+    getPopularBooks: getPopularBooks
 }
 
