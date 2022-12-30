@@ -5,7 +5,7 @@ const {
 } = require("../middlewares/middleware")
 const {
     getBookInfo,
-    getBookByName,
+    getBookByCriteria,
     getFeaturedBooks,
     getPopularBooks
 } = require("../services/booksService")
@@ -13,6 +13,6 @@ const {
 router.get('/books/:userId', getPopularBooks);
 router.get('/featured/:userId', getFeaturedBooks);
 router.get('/book/:bookId', bookMiddleware, getBookInfo);
-router.post('/book/search/:userId', getBookByName);
+router.post('/book/search', getBookByCriteria);
 
 module.exports = router;

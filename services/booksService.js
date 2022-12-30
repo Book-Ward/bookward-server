@@ -12,16 +12,8 @@ const getPopularBooks = async (req, res) => {
         .select('_id title coverImg genres');
 
         const user = await User.findOne( { userId: req.params?.userId?.toString() } );
-        if (user) {
-            const savedBooks = user.savedBooks;
-            data.forEach((book, idx) => {
-                if (savedBooks.includes(book._id.toString())) {
-                    data[idx] = { ...book._doc, liked: true };
-                } else {
-                    data[idx] = { ...book._doc, liked: false };
-                }
-            });
-        }
+
+        populateSavedBooks(data, user);
 
         res.status(200).json(data);
     }
@@ -38,16 +30,8 @@ const getFeaturedBooks = async (req, res) => {
         .select('_id title coverImg genres');
 
         const user = await User.findOne( { userId: req.params?.userId?.toString() } );
-        if (user) {
-            const savedBooks = user.savedBooks;
-            data.forEach((book, idx) => {
-                if (savedBooks.includes(book._id.toString())) {
-                    data[idx] = { ...book._doc, liked: true };
-                } else {
-                    data[idx] = { ...book._doc, liked: false };
-                }
-            });
-        }
+
+        populateSavedBooks(data, user);
 
         res.status(200).json(data);
     }
@@ -74,29 +58,21 @@ const getBookInfo = async (req, res) => {
     };
 }
 
-const getBookByName = async (req, res) => {
-    console.log("Getting book by name for: " + req.body.title.toString());
-
+const getBookByCriteria = async (req, res) => {
     try{
+        console.log(req.body)
         
-        const data = await Book.find({title: {'$regex': req.body.title.toString(),$options:'i'}})
+        const data = await Book.find({title: {'$regex': req.body?.title?.toString(),$options:'i'}})
         .sort({ numRatings: -1 })
         .limit(10)
         .select('_id title coverImg');
 
-        console.log("Found " + data.length + " mathes for query: " + req.body.title.toString())
-        
-        const user = await User.findOne( { userId: req.params?.userId?.toString() } );
-        if (user) {
-            const savedBooks = user.savedBooks;
-            data.forEach((book, idx) => {
-                if (savedBooks.includes(book._id.toString())) {
-                    data[idx] = { ...book._doc, liked: true };
-                } else {
-                    data[idx] = { ...book._doc, liked: false };
-                }
-            });
-        }
+        console.log("Found " + data.length + " mathes for query: " + req.body?.title?.toString())
+
+
+        const user = await User.findOne( { userId: req.body?.userId?.toString() } );
+
+        populateSavedBooks(data, user);
 
         res.status(200).json(data);
     }
@@ -105,9 +81,22 @@ const getBookByName = async (req, res) => {
     };
 }  
 
+function populateSavedBooks(books, user) {
+    if (user) {
+        const savedBooks = user.savedBooks;
+        books.forEach((book, idx) => {
+            if (savedBooks.includes(book._id.toString())) {
+                books[idx] = { ...book._doc, liked: true };
+            } else {
+                books[idx] = { ...book._doc, liked: false };
+            }
+        });
+    }
+}
+
 module.exports = {
     getBookInfo: getBookInfo,
-    getBookByName: getBookByName,
+    getBookByCriteria: getBookByCriteria,
     getFeaturedBooks: getFeaturedBooks,
     getPopularBooks: getPopularBooks
 }
