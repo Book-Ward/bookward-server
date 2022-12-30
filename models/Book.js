@@ -73,7 +73,7 @@ const bookSchema = new Schema({
     default: 0,
   },
   price: {
-    type: Number,
+    type: String,
     default: 0,
   },
 });

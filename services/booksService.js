@@ -2,13 +2,14 @@ const Book = require("../models/book");
 const User = require("../models/user");
 const { getReviewsByBookId } = require("./reviewsService");
 
+const minNumRatings = 500000;
+
 const getPopularBooks = async (req, res) => {
-    const minNumRatings = 500000;
 
     try{
         const data = await Book.find( { numRatings: { $gte:  minNumRatings} } )
         .sort({rating: -1})
-        .limit(24)
+        .limit(50)
         .select('_id title coverImg genres');
 
         const user = await User.findOne( { userId: req.params?.userId?.toString() } );
@@ -62,10 +63,21 @@ const getBookByCriteria = async (req, res) => {
     try{
         console.log(req.body)
         
-        const data = await Book.find({title: {'$regex': req.body?.title?.toString(),$options:'i'}})
-        .sort({ numRatings: -1 })
-        .limit(10)
-        .select('_id title coverImg');
+        let data = [];
+
+        if (req.body?.genres?.length > 0) {
+            // get books which match all genres lowercased and title
+            data = await Book.find({genres: {'$all': req.body?.genres?.map((genre) => genre.toLowerCase())}, title: {'$regex': req.body?.title?.toString(),$options:'i'}})
+            .sort({ numRatings: -1, rating: -1 })
+            .limit(25)
+            .select('_id title coverImg');
+        }
+        else {
+            data = await Book.find({title: {'$regex': req.body?.title?.toString(),$options:'i'}})
+            .sort({ numRatings: -1, rating: -1 })
+            .limit(25)
+            .select('_id title coverImg');
+        }
 
         console.log("Found " + data.length + " mathes for query: " + req.body?.title?.toString())
 
