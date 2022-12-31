@@ -63,24 +63,20 @@ const getBookByCriteria = async (req, res) => {
     try{
         console.log(req.body)
         
-        let data = [];
-
+        const query = {
+            title: { '$regex': req.body?.title?.toString(), $options: 'i' }
+        };
+        
         if (req.body?.genres?.length > 0) {
-            // get books which match all genres lowercased and title
-            data = await Book.find({genres: {'$all': req.body?.genres?.map((genre) => genre.toLowerCase())}, title: {'$regex': req.body?.title?.toString(),$options:'i'}})
-            .sort({ numRatings: -1, rating: -1 })
-            .limit(25)
-            .select('_id title coverImg');
+            query.genres = { '$all': req.body.genres.map((genre) => genre.toLowerCase()) };
         }
-        else {
-            data = await Book.find({title: {'$regex': req.body?.title?.toString(),$options:'i'}})
-            .sort({ numRatings: -1, rating: -1 })
-            .limit(25)
-            .select('_id title coverImg');
-        }
+        
+        const data = await Book.find(query)
+                                .sort({ numRatings: -1, rating: -1 })
+                                .limit(25)
+                                .select('_id title coverImg');
 
         console.log("Found " + data.length + " mathes for query: " + req.body?.title?.toString())
-
 
         const user = await User.findOne( { userId: req.body?.userId?.toString() } );
 
