@@ -64,13 +64,27 @@ const getBookByCriteria = async (req, res) => {
         console.log(req.body)
         
         const query = {
-            title: { '$regex': req.body?.title?.toString(), $options: 'i' }
+            title: { '$regex': req.body?.title?.toString().trim(), $options: 'i' }
         };
         
         if (req.body?.genres?.length > 0) {
             query.genres = { '$all': req.body.genres.map((genre) => genre.toLowerCase()) };
         }
+
+        if (req.body?.from) {
+            query.publishDate = { '$gte': new Date(req.body.from, 0, 1) };
+        }
         
+        if (req.body?.to) {
+            query.publishDate = { ...query.publishDate, '$lte': new Date(req.body.to, 11, 31) };
+        }
+
+        if (req.body?.rating)  {
+            const ratingNumber = Number(req.body.rating);
+
+            query.rating = { '$gte': ratingNumber };
+        }
+
         const data = await Book.find(query)
                                 .sort({ numRatings: -1, rating: -1 })
                                 .limit(25)
@@ -89,8 +103,8 @@ const getBookByCriteria = async (req, res) => {
     };
 }  
 
-function populateSavedBooks(books, user) {
-    if (user) {
+const populateSavedBooks = (books, user) => {
+    if (user && books) {
         const savedBooks = user.savedBooks;
         books.forEach((book, idx) => {
             if (savedBooks.includes(book._id.toString())) {
@@ -99,6 +113,8 @@ function populateSavedBooks(books, user) {
                 books[idx] = { ...book._doc, liked: false };
             }
         });
+    } else {
+        console.error("Error populating saved books");
     }
 }
 
@@ -106,6 +122,7 @@ module.exports = {
     getBookInfo: getBookInfo,
     getBookByCriteria: getBookByCriteria,
     getFeaturedBooks: getFeaturedBooks,
-    getPopularBooks: getPopularBooks
+    getPopularBooks: getPopularBooks,
+    populateSavedBooks: populateSavedBooks
 }
 

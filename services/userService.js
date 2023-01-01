@@ -1,12 +1,16 @@
 const User = require("../models/user");
 const Book = require("../models/book");
+const booksService = require("./booksService");
 
 const getUserInfo = async (req, res) => {
     try {
         const userId = req.params.userId.toString();
 
-        const user = await User.find( { userId: userId } )
+        const user = await User.findOne( { userId: userId } )
                                .populate("savedBooks reviews");
+
+        // TODO: It is not working
+        booksService.populateSavedBooks(user.savedBooks, user);
 
         res.status(200).json(user);
         
