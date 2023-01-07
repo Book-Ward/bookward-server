@@ -10,7 +10,7 @@ const {
     getPopularBooks
 } = require("../services/booksService")
 
-router.get('/books/:userId', getPopularBooks);
+router.post('/books/:page', getPopularBooks);
 router.get('/featured/:userId', getFeaturedBooks);
 router.get('/book/:bookId', bookMiddleware, getBookInfo);
 router.post('/book/search', getBookByCriteria);

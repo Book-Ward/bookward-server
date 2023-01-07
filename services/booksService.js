@@ -3,6 +3,9 @@ const User = require("../models/user");
 const { getReviewsByBookId } = require("./reviewsService");
 
 const getPopularBooks = async (req, res) => {
+    const userId = req.body?.userId?.toString() || null;
+    const page = req.params?.page?.toString() || 1;
+    const skip = (page - 1) * 50;
 
     try{
         const agg = Book.aggregate([
@@ -20,25 +23,31 @@ const getPopularBooks = async (req, res) => {
                 $sort: { combinedScore: -1 }
             },
             {
+                $skip: skip
+            },
+            {
                 $limit: 50
             }
         ]);
         
         const data = await agg.exec();
 
-        const user = await User.findOne( { userId: req.params?.userId?.toString() } );
+        if (userId !== null) {
+            const user = await User.findOne( { userId: userId } );
 
-        if (user && data) {
-            const savedBooks = user.savedBooks;
+            if (user && data) {
+                const savedBooks = user.savedBooks;
+    
+                data.forEach((book, idx) => {
+                    if (savedBooks.includes(book._id.toString())) {
+                        data[idx] = { ...book, liked: true };
+                    } else {
+                        data[idx] = { ...book, liked: false };
+                    }
+                });
+            } 
+        }
 
-            data.forEach((book, idx) => {
-                if (savedBooks.includes(book._id.toString())) {
-                    data[idx] = { ...book, liked: true };
-                } else {
-                    data[idx] = { ...book, liked: false };
-                }
-            });
-        } 
 
         res.status(200).json(data);
         
@@ -78,7 +87,6 @@ const getBookInfo = async (req, res) => {
         await book.save();
 
         const similarBooks = await getSimilarBooks(book);
-        console.log(similarBooks);
 
         res.status(200).json({bookInfo: book, reviews: reviews, similarBooks: similarBooks});
     }
@@ -97,7 +105,8 @@ const getSimilarBooks = async (book) => {
             {
                 $match: {
                     genres: { $in: genresArray },
-                    title: { $ne: title }
+                    title: { $ne: title },
+                    numRatings: { $gte: 10000 }
                 }
             },
             {
@@ -112,7 +121,8 @@ const getSimilarBooks = async (book) => {
             },
             {
                 $sort: {
-                    combinedScore: -1
+                    combinedScore: -1,
+                    rating: -1
                 }
             },
             {
