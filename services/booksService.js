@@ -7,7 +7,7 @@ const minNumRatings = 500000;
 const getPopularBooks = async (req, res) => {
 
     try{
-        Book.aggregate([
+        const agg = Book.aggregate([
             {
                 $addFields: {
                     combinedScore: {
@@ -24,29 +24,24 @@ const getPopularBooks = async (req, res) => {
             {
                 $limit: 50
             }
-        ]).exec(async (err, data) => {
-            if (err) {
-                console.log(err);
+        ]);
+        
+        const data = await agg.exec();
 
-                res.status(500).json({message: err.message});                
-            } else {
-                const user = await User.findOne( { userId: req.params?.userId?.toString() } );
+        const user = await User.findOne( { userId: req.params?.userId?.toString() } );
 
-                if (user && data) {
-                    const savedBooks = user.savedBooks;
-                    data.forEach((book, idx) => {
-                        if (savedBooks.includes(book._id.toString())) {
-                            data[idx] = { ...book, liked: true };
-                        } else {
-                            data[idx] = { ...book, liked: false };
-                        }
-                    });
-                } 
+        if (user && data) {
+            const savedBooks = user.savedBooks;
+            data.forEach((book, idx) => {
+                if (savedBooks.includes(book._id.toString())) {
+                    data[idx] = { ...book, liked: true };
+                } else {
+                    data[idx] = { ...book, liked: false };
+                }
+            });
+        } 
 
-                res.status(200).json(data);
-            }
-        });
-
+        res.status(200).json(data);
         
     }
     catch(error){
@@ -83,10 +78,55 @@ const getBookInfo = async (req, res) => {
         book.visited += 1;
         await book.save();
 
-        res.status(200).json({bookInfo: book, reviews: reviews});
+        const similarBooks = await getSimilarBooks(book);
+        console.log(similarBooks);
+
+        res.status(200).json({bookInfo: book, reviews: reviews, similarBooks: similarBooks});
     }
     catch(error){
         res.status(500).json({message: error.message});
+    };
+}
+
+const getSimilarBooks = async (book) => {
+    const genresArray = book.genres;
+    const author = book.author;
+
+    try{
+        const agg = Book.aggregate([
+            {
+                $match: {
+                    genres: { $in: genresArray }
+                }
+            },
+            {
+                $addFields: {
+                    combinedScore: {
+                        $add: [
+                            { $multiply: [{ $size: { $setIntersection: ["$genres", genresArray] } }, 0.3] }, 
+                            { $multiply: [{ $cond: [{ $eq: ["$author", author] }, 1, 0] }, 0.7] } 
+                        ]
+                    }
+                }
+            },
+            {
+                $sort: {
+                    combinedScore: -1
+                }
+            },
+            {
+                $limit: 5
+            }
+        ])
+        
+        const data = await agg.exec();
+
+        return data;
+    }
+    catch(error){
+        console.log(error);
+
+        return [];
     };
 }
 
