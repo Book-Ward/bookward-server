@@ -2,8 +2,6 @@ const Book = require("../models/book");
 const User = require("../models/user");
 const { getReviewsByBookId } = require("./reviewsService");
 
-const minNumRatings = 500000;
-
 const getPopularBooks = async (req, res) => {
 
     try{
@@ -32,6 +30,7 @@ const getPopularBooks = async (req, res) => {
 
         if (user && data) {
             const savedBooks = user.savedBooks;
+
             data.forEach((book, idx) => {
                 if (savedBooks.includes(book._id.toString())) {
                     data[idx] = { ...book, liked: true };
@@ -91,12 +90,14 @@ const getBookInfo = async (req, res) => {
 const getSimilarBooks = async (book) => {
     const genresArray = book.genres;
     const author = book.author;
+    const title = book.title;
 
     try{
         const agg = Book.aggregate([
             {
                 $match: {
-                    genres: { $in: genresArray }
+                    genres: { $in: genresArray },
+                    title: { $ne: title }
                 }
             },
             {
