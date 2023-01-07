@@ -7,16 +7,47 @@ const minNumRatings = 500000;
 const getPopularBooks = async (req, res) => {
 
     try{
-        const data = await Book.find( { numRatings: { $gte:  minNumRatings} } )
-        .sort({rating: -1})
-        .limit(50)
-        .select('_id title coverImg genres');
+        Book.aggregate([
+            {
+                $addFields: {
+                    combinedScore: {
+                        $add: [
+                            { $multiply: ["$numRatings", 0.7] },
+                            { $multiply: ["$rating", 0.3] }
+                        ]
+                    }
+                }
+            },
+            {
+                $sort: { combinedScore: -1 }
+            },
+            {
+                $limit: 50
+            }
+        ]).exec(async (err, data) => {
+            if (err) {
+                console.log(err);
 
-        const user = await User.findOne( { userId: req.params?.userId?.toString() } );
+                res.status(500).json({message: err.message});                
+            } else {
+                const user = await User.findOne( { userId: req.params?.userId?.toString() } );
 
-        populateSavedBooks(data, user);
+                if (user && data) {
+                    const savedBooks = user.savedBooks;
+                    data.forEach((book, idx) => {
+                        if (savedBooks.includes(book._id.toString())) {
+                            data[idx] = { ...book, liked: true };
+                        } else {
+                            data[idx] = { ...book, liked: false };
+                        }
+                    });
+                } 
 
-        res.status(200).json(data);
+                res.status(200).json(data);
+            }
+        });
+
+        
     }
     catch(error){
         res.status(500).json({message: error.message});
@@ -27,7 +58,7 @@ const getFeaturedBooks = async (req, res) => {
     try{
         const data = await Book.find()
         .sort( { visited: -1, rating: -1 } )
-        .limit(3)
+        .limit(8)
         .select('_id title coverImg genres');
 
         const user = await User.findOne( { userId: req.params?.userId?.toString() } );
