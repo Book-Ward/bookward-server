@@ -1,7 +1,7 @@
-const User = require('../models/user.js')
-const Review = require('../models/review.js')
-const Book = require('../models/book.js')
-const user = require('../models/user.js')
+const User = require('../models/user')
+const Review = require('../models/review')
+const Book = require('../models/book')
+const user = require('../models/user')
 
 const userMiddleware = async (req, res, next) => {
     const userId = req.body?.userId?.toString()
