@@ -35,17 +35,7 @@ const getPopularBooks = async (req, res) => {
         if (userId !== null) {
             const user = await User.findOne( { userId: userId } );
 
-            if (user && data) {
-                const savedBooks = user.savedBooks;
-    
-                data.forEach((book, idx) => {
-                    if (savedBooks.includes(book._id.toString())) {
-                        data[idx] = { ...book, liked: true };
-                    } else {
-                        data[idx] = { ...book, liked: false };
-                    }
-                });
-            } 
+            populateSavedBooksAggregate(data, user);
         }
 
 
@@ -142,9 +132,7 @@ const getSimilarBooks = async (book) => {
 }
 
 const getBookByCriteria = async (req, res) => {
-    try{
-        console.log(req.body)
-        
+    try{        
         const query = {
             title: { '$regex': req.body?.title?.toString().trim(), $options: 'i' }
         };
@@ -169,10 +157,12 @@ const getBookByCriteria = async (req, res) => {
 
         const data = await Book.find(query)
                                 .sort({ numRatings: -1, rating: -1 })
-                                .limit(25)
+                                .limit(50)
                                 .select('_id title coverImg');
 
         console.log("Found " + data.length + " mathes for query: " + req.body?.title?.toString())
+
+        console.log(req.body)
 
         const user = await User.findOne( { userId: req.body?.userId?.toString() } );
 
@@ -199,6 +189,22 @@ const populateSavedBooks = (books, user) => {
         console.error("Error populating saved books");
     }
 }
+
+const populateSavedBooksAggregate = (books, user) => {
+    if (user && books) {
+        const savedBooks = user.savedBooks;
+        books.forEach((book, idx) => {
+            if (savedBooks.includes(book._id.toString())) {
+                books[idx] = { ...book, liked: true };
+            } else {
+                books[idx] = { ...book, liked: false };
+            }
+        });
+    } else {
+        console.error("Error populating saved books");
+    }
+}
+
 
 module.exports = {
     getBookInfo: getBookInfo,
