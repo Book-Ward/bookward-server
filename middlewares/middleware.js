@@ -5,15 +5,27 @@ const Book = require('../models/book')
 const userMiddleware = async (req, res, next) => {
     const userId = req.body?.userId?.toString()
     const email = req.body?.email?.toString()
+    const name = req.body?.username?.toString()
 
-    const user = await User.findOne( { userId: userId } );
+    const user = await User.findOne( { userId } );
 
-    if (!userId && !email) {
-        res.status(400).json( { message: "User ID and email are required" } );
-    } else if (!user) {
-        await User.create( { userId: userId, email: email } );
-    } else {
+    if (user)
+    {
         next();
+
+        return;
+    }
+
+    if (!user && userId && email && name) { 
+        await User.create( { userId, email, name } );
+
+        next();
+
+        return;
+    } else {
+        res.status(400).json( { message: "Missing user metadata" } )
+
+        return;
     }
 }
 
