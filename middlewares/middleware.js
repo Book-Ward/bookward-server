@@ -1,7 +1,6 @@
 const User = require('../models/user')
 const Review = require('../models/review')
 const Book = require('../models/book')
-const user = require('../models/user')
 
 const userMiddleware = async (req, res, next) => {
     const userId = req.body?.userId?.toString()
@@ -9,7 +8,7 @@ const userMiddleware = async (req, res, next) => {
 
     const user = await User.findOne( { userId: userId } );
 
-    if (!userId || !email) {
+    if (!userId && !email) {
         res.status(400).json( { message: "User ID and email are required" } );
     } else if (!user) {
         await User.create( { userId: userId, email: email } );

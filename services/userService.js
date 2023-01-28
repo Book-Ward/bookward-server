@@ -53,7 +53,59 @@ const saveBook = async (req, res) => {
     };
 }
 
+const followUser = async (req, res) => {
+    try {
+        const user = await User.findOne( { userId: req.body.userId.toString() } );
+
+        const userToFollow = await User.findOne( { userId: req.body.userToFollowId.toString() } );
+
+        if (!userToFollow) {
+            res.status(500).json( { success: false, message: "User not found" } );
+
+            return;
+        }
+
+        if (user._id.toString() === userToFollow._id.toString()) {
+            res.status(500).json( { success: false, message: "You cannot follow yourself" } );
+
+            return;
+        }
+
+        if (user.following.includes(userToFollow._id)) {
+            user.following = user.following.filter((userId) => userId.toString() !== userToFollow._id.toString());
+
+            user.followers = user.followers.filter((userId) => userId.toString() !== user._id.toString());
+        }
+        else {
+            user.following.push(userToFollow._id);
+
+            userToFollow.followers.push(user._id);
+        }
+
+        await user.save();
+
+        await userToFollow.save();
+
+        res.status(200).json( { success: true, data: user } )
+    }
+    catch(error) {
+        res.status(500).json( { message: error.message } );
+    };
+}
+
+const searchUsers = async (req, res) => {
+    try {
+        const users = await User.find( { $text: { $search: req.params.searchText } } );
+
+        res.status(200).json(users);
+    }
+    catch(error) {
+        res.status(500).json( { message: error.message } );
+    };
+}
+
 module.exports = {
     getUserInfo: getUserInfo,
-    saveBook: saveBook
+    saveBook: saveBook,
+    followUser: followUser
 }

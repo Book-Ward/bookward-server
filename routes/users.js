@@ -5,10 +5,12 @@ const {
 } = require("../middlewares/middleware")
 const {
     getUserInfo,
-    saveBook
+    saveBook,
+    followUser,
 } = require("../services/userService")
 
 router.post("/users/:userId", userMiddleware, getUserInfo);
 router.post("/saveBook", userMiddleware, saveBook);
+router.post("/followUser", userMiddleware, followUser);
 
 module.exports = router;
