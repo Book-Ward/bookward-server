@@ -95,7 +95,10 @@ const followUser = async (req, res) => {
 
 const searchUsers = async (req, res) => {
     try {
-        const users = await User.find(  );
+        const users = await User.find( { name: { $regex: req.params.username, $options: "i" } } )
+        .limit(10);
+
+        console.log("Found " + users.length + " matches for query: " + req.params.username);
 
         res.status(200).json(users);
     }
@@ -107,5 +110,6 @@ const searchUsers = async (req, res) => {
 module.exports = {
     getUserInfo: getUserInfo,
     saveBook: saveBook,
-    followUser: followUser
+    followUser: followUser,
+    searchUsers: searchUsers
 }
