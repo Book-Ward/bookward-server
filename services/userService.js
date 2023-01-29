@@ -58,15 +58,16 @@ const followUser = async (req, res) => {
         const user = await User.findOne( { userId: req.body.userId.toString() } );
 
         const userToFollow = await User.findOne( { userId: req.body.userToFollowId.toString() } );
+        // const userToFollow = await User.findById(req.body.userToFollowId.toString());
 
         if (!userToFollow) {
-            res.status(500).json( { success: false, message: "User not found" } );
+            res.status(404).json( { success: false, message: "User not found" } );
 
             return;
         }
 
         if (user._id.toString() === userToFollow._id.toString()) {
-            res.status(500).json( { success: false, message: "You cannot follow yourself" } );
+            res.status(405).json( { success: false, message: "You cannot follow yourself" } );
 
             return;
         }
@@ -96,7 +97,8 @@ const followUser = async (req, res) => {
 const searchUsers = async (req, res) => {
     try {
         const users = await User.find( { name: { $regex: req.params.username, $options: "i" } } )
-        .limit(10);
+        .limit(10)
+        .select("name userId");
 
         console.log("Found " + users.length + " matches for query: " + req.params.username);
 
