@@ -1,6 +1,7 @@
 const User = require("../models/user");
 const Book = require("../models/book");
 const booksService = require("./booksService");
+const supabase_middleware = require("../middlewares/supabase-middleware");
 
 const getUserInfo = async (req, res) => {
     try {
@@ -96,11 +97,27 @@ const followUser = async (req, res) => {
 
 const searchUsers = async (req, res) => {
     try {
+
         const users = await User.find( { name: { $regex: req.params.username, $options: "i" } } )
         .limit(10)
         .select("name userId");
 
         console.log("Found " + users.length + " matches for query: " + req.params.username);
+        
+        const { data, error } = await supabase_middleware(req, res);
+
+        if (data.user) {
+            const searcher = await User.findOne( { userId: data.user.id } );
+
+            users.forEach((user, idx) => {
+                console.log(searcher);
+                if (searcher.following.includes(user._id)) {
+                    users[idx] = { ...user._doc, isFollowing: true }
+                } else {
+                    users[idx] = { ...user._doc, isFollowing: false }
+                }
+            });
+        }
 
         res.status(200).json(users);
     }
