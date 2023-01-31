@@ -2,7 +2,8 @@ const express = require('express');
 const router = express.Router()
 const {
     bookMiddleware,
-} = require("../middlewares/middleware")
+} = require("../middlewares/middleware");
+const supabase_middleware = require('../middlewares/supabase-middleware');
 const {
     getBookInfo,
     getBookByCriteria,

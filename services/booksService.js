@@ -41,9 +41,12 @@ const getPopularBooks = async (req, res) => {
 
         res.status(200).json(data);
         
+        return;
     }
     catch(error){
-        res.status(500).json({message: error.message});
+        res.status(500).json( { message: error.message } );
+
+        return;
     }
 };
 

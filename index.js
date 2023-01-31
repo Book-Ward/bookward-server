@@ -5,6 +5,7 @@ const booksRouter = require('./routes/books');
 const reviewsRouter = require('./routes/reviews');
 const userRouter = require('./routes/users');
 require("dotenv").config();
+const { createClient } = require('@supabase/supabase-js')
 
 const app = express();
 
@@ -54,5 +55,8 @@ mongoose
   .catch((err) => {
     console.error(err);
   });
+
+const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY, {})
+app.set("supabase", supabase)
 
 module.exports = app;

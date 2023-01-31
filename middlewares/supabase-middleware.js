@@ -1,9 +1,8 @@
-const { createClient } = require('@supabase/supabase-js')
-
 function getToken(req) {
   // If the token is not present and it is not Bearer
   if (!(req.headers.authorization &&
-     req.headers.authorization.split(" ")[0] === "Bearer")) {
+    req.headers.authorization.split(" ")[0] === "Bearer")) {
+      
     return null;
   } 
   
@@ -12,8 +11,7 @@ function getToken(req) {
 
 const supabase_middleware = async (req, res, next) => {
   
-  // TODO: Do not create client on every request
-  const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY, {})
+  const supabase = req.app.get('supabase')
 
   const JWT = getToken(req)
 
