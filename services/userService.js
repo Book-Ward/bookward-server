@@ -104,9 +104,11 @@ const searchUsers = async (req, res) => {
 
         console.log("Found " + users.length + " matches for query: " + req.params.username);
         
-        const { data, error } = await supabase_middleware(req);
+        // const { data, error } = await supabase_middleware(req);
 
-        if (!error && data?.user) {
+        if (res.locals?.data?.data?.user) {
+            const { data } = res?.locals?.data
+
             const searcher = await User.findOne( { userId: data.user.id } );
 
             users.forEach((user, idx) => {

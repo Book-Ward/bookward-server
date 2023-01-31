@@ -10,7 +10,7 @@ function getToken(req) {
   return req.headers.authorization.split(" ")[1];
 }
 
-const supabase_middleware = async (req) => {
+const supabase_middleware = async (req, res, next) => {
   
   // TODO: Do not create client on every request
   const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY, {})
@@ -20,10 +20,14 @@ const supabase_middleware = async (req) => {
   if (!JWT) {
     console.error('No JWT parsed')
 
-    return { data: null, error: 'No JWT parsed' }
+    res.locals.data = null
+
+    next();
   }
 
-  return await supabase.auth.getUser(JWT)
+  res.locals.data = await supabase.auth.getUser(JWT)
+
+  next();
 }
 
 module.exports = supabase_middleware
