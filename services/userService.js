@@ -104,17 +104,14 @@ const searchUsers = async (req, res) => {
 
         console.log("Found " + users.length + " matches for query: " + req.params.username);
         
-        const { data, error } = await supabase_middleware(req, res);
+        const { data, error } = await supabase_middleware(req);
 
-        if (data.user) {
+        if (!error && data?.user) {
             const searcher = await User.findOne( { userId: data.user.id } );
 
             users.forEach((user, idx) => {
-                console.log(searcher);
                 if (searcher.following.includes(user._id)) {
                     users[idx] = { ...user._doc, isFollowing: true }
-                } else {
-                    users[idx] = { ...user._doc, isFollowing: false }
                 }
             });
         }
