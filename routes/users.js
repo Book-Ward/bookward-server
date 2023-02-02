@@ -9,6 +9,7 @@ const {
     saveBook,
     followUser,
     searchUsers,
+    getFollowing,
 } = require("../services/userService")
 const {
     sendRecommendation,
@@ -19,8 +20,9 @@ router.post("/users/:userId", userMiddleware, getUserInfo);
 router.post("/saveBook", userMiddleware, saveBook);
 router.post("/followUser", userMiddleware, followUser);
 router.get("/searchUsers/:username", supabase_middleware, searchUsers);
+router.get("/followingUsers", supabase_middleware, getFollowing)
 
-router.post("/recommendation", supabase_middleware, sendRecommendation);
+router.post("/recommend/:id", supabase_middleware, sendRecommendation);
 router.get("/recommendations", supabase_middleware, getUnseenRecommendations);
 
 module.exports = router;

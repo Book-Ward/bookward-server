@@ -15,7 +15,7 @@ const sendRecommendation = async (req, res) => {
             return;
         }
 
-        if (!req.body.receiverId) {
+        if (!req.params.id) {
             res.status(400).json({ message: "Receiver id is required" });
             return;
         }
@@ -23,15 +23,15 @@ const sendRecommendation = async (req, res) => {
         if (!req.body.bookId) {
             res.status(400).json({ message: "Book id is required" });
             return;
-        }
-
-        if (user.id === req.body.receiverId) {
-            res.status(400).json({ message: "You can't recommend a book to yourself" });
-            return;
-        }        
+        }     
 
         const sender = await User.findOne({ userId: user.id });
-        const receiver = await User.findOne({ userId: req.body.receiverId });
+        const receiver = await User.findById(req.params.id);
+
+        if (sender._id.toString() === receiver._id.toString()) {
+            res.status(400).json({ message: "You can't recommend a book to yourself" });
+            return;
+        }   
 
         const sameReview = await Recommendation.findOne({ book: req.body.bookId, sender: sender._id, receiver: receiver._id });
         

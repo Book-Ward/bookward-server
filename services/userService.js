@@ -123,9 +123,29 @@ const searchUsers = async (req, res) => {
     };
 }
 
+const getFollowing = async (req, res) => {
+    try {
+        const user = res.locals?.data?.data?.user;
+
+        if (!user) {
+            res.status(401).json({ message: "Unauthorized" });
+            return;
+        }
+
+        const userObj = await User.findOne( { userId: user.id } )
+                                  .populate("following", "userId name");
+
+        res.status(200).json({ success: true, data: userObj.following });
+    }
+    catch(error) {
+        res.status(500).json( { message: error.message } );
+    };
+}
+
 module.exports = {
-    getUserInfo: getUserInfo,
-    saveBook: saveBook,
-    followUser: followUser,
-    searchUsers: searchUsers
+    getUserInfo,
+    saveBook,
+    followUser,
+    searchUsers,
+    getFollowing,
 }
