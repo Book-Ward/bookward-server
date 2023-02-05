@@ -15,6 +15,6 @@ router.post('/books/:page', getPopularBooks);
 router.get('/featured/:userId', getFeaturedBooks);
 // add bookMiddleware 
 router.get('/book/:bookId', supabase_middleware, getBookInfo);
-router.post('/book/search', getBookByCriteria);
+router.post('/book/search', supabase_middleware, getBookByCriteria);
 
 module.exports = router;

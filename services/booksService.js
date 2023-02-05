@@ -154,25 +154,24 @@ const getSimilarBooks = async (book) => {
 const getBookByCriteria = async (req, res) => {
     try{        
 
+        let query = {
+            title: { '$regex': req.body?.title?.toString().trim(), $options: 'i' }
+        };
+
         // Execute author query if it an author
         const authorBooks = await Book.find( { "author": req.body?.title?.toString().trim() } )
                                       .sort({ numRatings: -1, rating: -1 })
                                       .limit(50)
                                       .select('_id title coverImg');
+
         if (authorBooks.length > 0) {
             console.log("Author query");
             const user = await User.findOne( { userId: req.body?.userId?.toString() } );
 
-            populateSavedBooks(authorBooks, user);
-
-            res.status(200).json(authorBooks);
-
-            return;
+            query = {
+                author: req.body?.title?.toString().trim() 
+            }
         }
-
-        const query = {
-            title: { '$regex': req.body?.title?.toString().trim(), $options: 'i' }
-        };
             
         if (req.body?.genres?.length > 0) {
             query.genres = { '$all': req.body.genres.map((genre) => genre.toLowerCase()) };
@@ -199,9 +198,14 @@ const getBookByCriteria = async (req, res) => {
 
         console.log("Found " + data.length + " mathes for query: " + req.body?.title?.toString())
 
-        const user = await User.findOne( { userId: req.body?.userId?.toString() } );
+        const user = res.locals?.data?.data?.user;
+        if (user)
+        {
+            const userObj = await User.findOne( { userId: user.id } );
 
-        populateSavedBooks(data, user);
+            populateSavedBooks(data, userObj);
+        }
+
 
         res.status(200).json(data);
     }
