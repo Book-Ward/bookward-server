@@ -13,7 +13,8 @@ const {
 
 router.post('/books/:page', getPopularBooks);
 router.get('/featured/:userId', getFeaturedBooks);
-router.get('/book/:bookId', bookMiddleware, getBookInfo);
+// add bookMiddleware 
+router.get('/book/:bookId', supabase_middleware, getBookInfo);
 router.post('/book/search', getBookByCriteria);
 
 module.exports = router;

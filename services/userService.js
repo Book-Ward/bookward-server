@@ -23,31 +23,38 @@ const getUserInfo = async (req, res) => {
 
 const saveBook = async (req, res) => {
     try {
-        console.log(req.body);
-        const user = await User.findOne( { userId: req.body.userId.toString() } );
+        const user = res.locals?.data?.data?.user;
+
+        if (!user) {
+            res.status(401).json({ message: "Unauthorized" });
+            return;
+        }
+
+        const userObj = await User.findOne( { userId: user.id } );
 
         const book = await Book.findById(req.body.bookId.toString());
 
         if (!book) {
-            res.status(500).json( { success: false, message: "Book not found" } );
-        } else {
-            if (user.savedBooks.includes(book._id)) {
+            res.status(404).json( { success: false, message: "Book not found" } );
 
-                user.savedBooks = user.savedBooks.filter((bookId) => bookId.toString() !== book._id.toString());
-
-                await user.save();
-
-                res.status(200).json( { success: true, data: user } )
-            } else {
-                if (req.body.liked) {
-                    user.savedBooks.push(book._id);
-                }
-
-                await user.save();    
-
-                res.status(200).json( { success: true, data: user } )
-            }
+            return;
         }
+         
+        // Unsave book
+        if (userObj.savedBooks.includes(book._id)) {
+
+            userObj.savedBooks = userObj.savedBooks.filter((bookId) => bookId.toString() !== book._id.toString());
+        }
+        // Save book
+        else {
+
+            userObj.savedBooks.push(book._id);
+        }
+
+        await userObj.save();    
+
+        res.status(200).json( { success: true, data: userObj } )
+    
     }
     catch(error) {
         res.status(500).json( { message: error.message } );

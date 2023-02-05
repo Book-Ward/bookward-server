@@ -69,23 +69,40 @@ const getFeaturedBooks = async (req, res) => {
 };
 
 const getBookInfo = async (req, res) => {
-    console.log("Getting book info for: " + req.params.bookId.toString());
+    const user = res.locals?.data?.data?.user;
+    const bookId = req.params.bookId.toString();
+    let saved = false;
 
     try{
-        const book = await Book.findById(req.params.bookId.toString());
+        const book = await Book.findById(bookId);
 
-        const reviews = await getReviewsByBookId(req.params.bookId.toString());
-
-        book.visited += 1;
-        await book.save();
+        const reviews = await getReviewsByBookId(bookId);
 
         const similarBooks = await getSimilarBooks(book);
 
-        res.status(200).json({bookInfo: book, reviews: reviews, similarBooks: similarBooks});
+        if (user) {
+            const userObj = await User.findOne( { userId: user.id } );
+
+            saved = userObj.savedBooks.includes(book._id);
+        }
+
+        incrementVisited(book);
+
+        res.status(200).json({bookInfo: book, reviews, similarBooks, saved});
     }
     catch(error){
         res.status(500).json({message: error.message});
     };
+}
+
+const incrementVisited = async (book) => {
+    try{
+        book.visited += 1;
+        await book.save();
+    }
+    catch(error){
+        console.log(error.message);
+    }
 }
 
 const getSimilarBooks = async (book) => {

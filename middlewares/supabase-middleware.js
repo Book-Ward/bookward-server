@@ -18,11 +18,10 @@ const supabase_middleware = async (req, res, next) => {
   if (!JWT) {
     console.error('No JWT parsed')
 
-    res.locals.data = null
-
     next();
+    return;
   }
-
+ 
   res.locals.data = await supabase.auth.getUser(JWT)
 
   next();
