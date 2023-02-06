@@ -14,6 +14,7 @@ const {
 const {
     sendRecommendation,
     getUnseenRecommendations,
+    acknowledgeRecommendation,
 } = require("../services/recommendationService")
 
 router.post("/users/:userId", userMiddleware, getUserInfo);
@@ -24,5 +25,6 @@ router.get("/followingUsers", supabase_middleware, getFollowing)
 
 router.post("/recommend/:id", supabase_middleware, sendRecommendation);
 router.get("/recommendations", supabase_middleware, getUnseenRecommendations);
+router.get("/recommendation/acknowledge/:id", supabase_middleware, acknowledgeRecommendation);
 
 module.exports = router;

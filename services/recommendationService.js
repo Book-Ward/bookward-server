@@ -85,7 +85,45 @@ const getUnseenRecommendations = async (req, res) => {
     }
 }
 
+const acknowledgeRecommendation = async (req, res) => {
+    try {
+        const user = res.locals?.data?.data?.user;
+
+        if (!user) {
+            res.status(401).json({ message: "Unauthorized" });
+            return;
+        }
+
+        if (!req.params.id) {
+            res.status(400).json({ message: "Recommendation id is required" });
+            return;
+        }
+
+        const recommendation = await Recommendation.findById(req.params.id);
+
+        if (!recommendation) {
+            res.status(400).json({ message: "Recommendation not found" });
+            return;
+        }
+
+        const userObj = await User.findOne({ userId: user.id });
+        if (recommendation.receiver.toString() !== userObj._id.toString()) {
+            res.status(401).json({ message: "Unauthorized" });
+            return;
+        }
+
+        recommendation.seen = true;
+        await recommendation.save();
+
+        res.status(200).json({ success: true, data: recommendation });
+    }
+    catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
+
 module.exports = {
     sendRecommendation,
     getUnseenRecommendations,
+    acknowledgeRecommendation,
 };
