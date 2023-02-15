@@ -1,7 +1,7 @@
 const User = require("../models/user");
 const Book = require("../models/book");
 const booksService = require("./booksService");
-const supabase_middleware = require("../middlewares/supabase-middleware");
+const supabase_middleware = require("../middlewares/supabaseMiddleware");
 
 const getUserInfo = async (req, res) => {
     try {

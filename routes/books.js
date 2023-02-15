@@ -3,7 +3,7 @@ const router = express.Router()
 const {
     bookMiddleware,
 } = require("../middlewares/middleware");
-const supabase_middleware = require('../middlewares/supabase-middleware');
+const supabase_middleware = require('../middlewares/supabaseMiddleware');
 const {
     getBookInfo,
     getBookByCriteria,
@@ -13,7 +13,6 @@ const {
 
 router.post('/books/:page', getPopularBooks);
 router.get('/featured/:userId', getFeaturedBooks);
-// add bookMiddleware 
 router.get('/book/:bookId', supabase_middleware, getBookInfo);
 router.post('/book/search', supabase_middleware, getBookByCriteria);
 

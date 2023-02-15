@@ -158,7 +158,7 @@ const getBookByCriteria = async (req, res) => {
             title: { '$regex': req.body?.title?.toString().trim(), $options: 'i' }
         };
 
-        // Execute author query if it an author
+        // Execute author query if it is an author
         const authorBooks = await Book.find( { "author": req.body?.title?.toString().trim() } )
                                       .sort({ numRatings: -1, rating: -1 })
                                       .limit(50)
