@@ -45,6 +45,7 @@ const postBookReview = async (req, res) => {
 
 const deleteBookReview = async (req, res) => {
     try {
+        // TODO: validate the author of the review is the same as the user making the request
         const data = await Review.findByIdAndDelete(req.params.bookId.toString());
 
         res.status(200).json(data);

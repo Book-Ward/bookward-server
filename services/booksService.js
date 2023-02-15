@@ -3,7 +3,7 @@ const User = require("../models/user");
 const { getReviewsByBookId } = require("./reviewsService");
 
 const getPopularBooks = async (req, res) => {
-    const userId = req.body?.userId?.toString() || null;
+    const user = res.locals?.data?.data?.user;
     const page = req.params?.page?.toString() || 1;
     const skip = (page - 1) * 50;
 
@@ -32,10 +32,10 @@ const getPopularBooks = async (req, res) => {
         
         const data = await agg.exec();
 
-        if (userId !== null) {
-            const user = await User.findOne( { userId: userId } );
+        if (user) {
+            const userObj = await User.findOne( { userId: user.id } );
 
-            populateSavedBooksAggregate(data, user);
+            populateSavedBooksAggregate(data, userObj);
         }
 
 
