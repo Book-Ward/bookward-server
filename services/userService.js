@@ -13,7 +13,7 @@ const getUserInfo = async (req, res) => {
         }
 
         const userObj = await User.findOne( { userId: user.id } )
-                                  .populate("savedBooks reviews");
+                                  .populate("savedBooks reviews following followers");
 
         // TODO: It is not working
         booksService.populateSavedBooks(userObj.savedBooks, userObj);
