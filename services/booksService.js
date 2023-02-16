@@ -161,7 +161,7 @@ const getBookByCriteria = async (req, res) => {
         // Execute author query if it is an author
         const authorBooks = await Book.find( { "author": req.body?.title?.toString().trim() } )
                                       .sort({ numRatings: -1, rating: -1 })
-                                      .limit(50)
+                                    //   .limit(50)
                                       .select('_id title coverImg');
 
         if (authorBooks.length > 0) {

@@ -5,16 +5,20 @@ const supabase_middleware = require("../middlewares/supabaseMiddleware");
 
 const getUserInfo = async (req, res) => {
     try {
-        const userId = req.params.userId.toString();
+        const user = res.locals?.data?.data?.user;
 
-        const user = await User.findOne( { userId: userId } )
-                               .populate("savedBooks reviews");
+        if (!user) {
+            res.status(401).json({ message: "Unauthorized" });
+            return;
+        }
+
+        const userObj = await User.findOne( { userId: userId } )
+                                  .populate("savedBooks reviews");
 
         // TODO: It is not working
-        booksService.populateSavedBooks(user.savedBooks, user);
+        booksService.populateSavedBooks(userObj.savedBooks, userObj);
 
-        res.status(200).json(user);
-        
+        res.status(200).json(userObj);
     }
     catch(error) {
         res.status(500).json( { message: error.message } );
