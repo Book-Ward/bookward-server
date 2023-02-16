@@ -12,7 +12,7 @@ const getUserInfo = async (req, res) => {
             return;
         }
 
-        const userObj = await User.findOne( { userId: userId } )
+        const userObj = await User.findOne( { userId: user.id } )
                                   .populate("savedBooks reviews");
 
         // TODO: It is not working

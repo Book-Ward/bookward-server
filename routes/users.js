@@ -17,7 +17,7 @@ const {
     acknowledgeRecommendation,
 } = require("../services/recommendationService")
 
-router.post("/users/:userId", getUserInfo);
+router.post("/users/:userId", supabase_middleware, getUserInfo);
 router.post("/saveBook", supabase_middleware, saveBook);
 router.post("/followUser", userMiddleware, followUser);
 router.get("/searchUsers/:username", supabase_middleware, searchUsers);
