@@ -23,20 +23,28 @@ const sendRecommendation = async (req, res) => {
         if (!req.body.bookId) {
             res.status(400).json({ message: "Book id is required" });
             return;
-        }     
+        }
 
         const sender = await User.findOne({ userId: user.id });
         const receiver = await User.findById(req.params.id);
 
         if (sender._id.toString() === receiver._id.toString()) {
-            res.status(400).json({ message: "You can't recommend a book to yourself" });
+            res.status(400).json({
+                message: "You can't recommend a book to yourself",
+            });
             return;
-        }   
+        }
 
-        const sameReview = await Recommendation.findOne({ book: req.body.bookId, sender: sender._id, receiver: receiver._id });
-        
+        const sameReview = await Recommendation.findOne({
+            book: req.body.bookId,
+            sender: sender._id,
+            receiver: receiver._id,
+        });
+
         if (sameReview) {
-            res.status(400).json({ message: "You have already recommended this book to this user" });
+            res.status(400).json({
+                message: "You have already recommended this book to this user",
+            });
             return;
         }
 
@@ -50,11 +58,10 @@ const sendRecommendation = async (req, res) => {
         await recommendation.save();
 
         res.status(200).json({ success: true, data: recommendation });
-
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
-}
+};
 
 const getUnseenRecommendations = async (req, res) => {
     try {
@@ -72,18 +79,20 @@ const getUnseenRecommendations = async (req, res) => {
             return;
         }
 
-        const recommendations = await Recommendation.find({ receiver: receiver._id, seen: false })
-                                                    .populate("sender", "name")
-                                                    .populate("book", "title author coverImg description")
-                                                    .sort({ date: -1 })
-                                                    .limit(10);
+        const recommendations = await Recommendation.find({
+            receiver: receiver._id,
+            seen: false,
+        })
+            .populate("sender", "name")
+            .populate("book", "title author coverImg description")
+            .sort({ date: -1 })
+            .limit(10);
 
         res.status(200).json({ success: true, data: recommendations });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
-    catch (error) {
-        res.status(500).json({ message: error.message });   
-    }
-}
+};
 
 const acknowledgeRecommendation = async (req, res) => {
     try {
@@ -116,11 +125,10 @@ const acknowledgeRecommendation = async (req, res) => {
         await recommendation.save();
 
         res.status(200).json({ success: true, data: recommendation });
-    }
-    catch (error) {
+    } catch (error) {
         res.status(500).json({ message: error.message });
     }
-}
+};
 
 module.exports = {
     sendRecommendation,

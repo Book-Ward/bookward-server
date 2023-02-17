@@ -1,71 +1,70 @@
 const Book = require("../models/book");
 const User = require("../models/user");
 const { getReviewsByBookId } = require("./reviewsService");
-const axios = require('axios');
+const axios = require("axios");
 
 const getPopularBooks = async (req, res) => {
     const user = res.locals?.data?.data?.user;
     const page = req.params?.page?.toString() || 1;
     const skip = (page - 1) * 50;
 
-    try{
+    try {
         const agg = Book.aggregate([
             {
                 $addFields: {
                     combinedScore: {
                         $add: [
                             { $multiply: ["$numRatings", 0.7] },
-                            { $multiply: ["$rating", 0.3] }
-                        ]
-                    }
-                }
+                            { $multiply: ["$rating", 0.3] },
+                        ],
+                    },
+                },
             },
             {
-                $sort: { combinedScore: -1 }
+                $sort: { combinedScore: -1 },
             },
             {
-                $skip: skip
+                $skip: skip,
             },
             {
-                $limit: 50
-            }
+                $limit: 50,
+            },
         ]);
-        
+
         const data = await agg.exec();
 
         if (user) {
-            const userObj = await User.findOne( { userId: user.id } );
+            const userObj = await User.findOne({ userId: user.id });
 
             populateSavedBooksAggregate(data, userObj);
         }
 
-
         res.status(200).json(data);
-        
+
         return;
-    }
-    catch(error){
-        res.status(500).json( { message: error.message } );
+    } catch (error) {
+        res.status(500).json({ message: error.message });
 
         return;
     }
 };
 
 const getFeaturedBooks = async (req, res) => {
-    try{
+    try {
         const data = await Book.find()
-        .sort( { visited: -1, rating: -1 } )
-        .limit(8)
-        .select('_id title coverImg genres');
+            .sort({ visited: -1, rating: -1 })
+            .limit(8)
+            .select("_id title coverImg genres");
 
-        const user = await User.findOne( { userId: req.params?.userId?.toString() } );
+        const user = await User.findOne({
+            userId: req.params?.userId?.toString(),
+        });
 
         populateSavedBooks(data, user);
 
         res.status(200).json(data);
-    }
-    catch(error){
-        res.status(500).json({message: error.message});
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 };
 
@@ -74,7 +73,7 @@ const getBookInfo = async (req, res) => {
     const bookId = req.params.bookId.toString();
     let saved = false;
 
-    try{
+    try {
         const book = await Book.findById(bookId);
 
         const reviews = await getReviewsByBookId(bookId);
@@ -84,7 +83,7 @@ const getBookInfo = async (req, res) => {
         const keyPhrases = await getKeyPhrases(reviews);
 
         if (user) {
-            const userObj = await User.findOne( { userId: user.id } );
+            const userObj = await User.findOne({ userId: user.id });
 
             saved = userObj.savedBooks.includes(book._id);
         }
@@ -93,24 +92,28 @@ const getBookInfo = async (req, res) => {
 
         console.log(keyPhrases);
 
-        res.status(200).json( { bookInfo: book, reviews, similarBooks, saved, keyPhrases } );
+        res.status(200).json({
+            bookInfo: book,
+            reviews,
+            similarBooks,
+            saved,
+            keyPhrases,
+        });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
-    catch(error){
-        res.status(500).json( { message: error.message } );
-    };
-}
+};
 
 const incrementVisited = async (book) => {
-    try{
+    try {
         book.visited += 1;
         await book.save();
-    }
-    catch(error){
+    } catch (error) {
         console.log(error.message);
     }
-}
+};
 
-const getKeyPhrases = async (reviews) => { 
+const getKeyPhrases = async (reviews) => {
     const reviewsList = reviews.map((review) => review.content);
 
     const data = {
@@ -142,21 +145,21 @@ const getKeyPhrases = async (reviews) => {
                 console.error(`Error: ${error.message}`);
             }
         });
-}
+};
 
 const getSimilarBooks = async (book) => {
     const genresArray = book.genres;
     const author = book.author;
     const title = book.title;
 
-    try{
+    try {
         const agg = Book.aggregate([
             {
                 $match: {
                     genres: { $in: genresArray },
                     title: { $ne: title },
-                    numRatings: { $gte: 10000 }
-                }
+                    numRatings: { $gte: 10000 },
+                },
             },
             {
                 $addFields: {
@@ -171,87 +174,94 @@ const getSimilarBooks = async (book) => {
             {
                 $sort: {
                     combinedScore: -1,
-                    rating: -1
-                }
+                    rating: -1,
+                },
             },
             {
-                $limit: 5
-            }
-        ])
-        
+                $limit: 5,
+            },
+        ]);
+
         const data = await agg.exec();
 
         return data;
-    }
-    catch(error){
+    } catch (error) {
         console.log(error);
 
         return [];
-    };
-}
+    }
+};
 
 const getBookByCriteria = async (req, res) => {
-    try{        
-
+    try {
         let query = {
-            title: { '$regex': req.body?.title?.toString().trim(), $options: 'i' }
+            title: {
+                $regex: req.body?.title?.toString().trim(),
+                $options: "i",
+            },
         };
 
         // Execute author query if it is an author
-        const authorBooks = await Book.find( { "author": req.body?.title?.toString().trim() } )
-                                      .sort({ numRatings: -1, rating: -1 })
-                                    //   .limit(50)
-                                      .select('_id title coverImg');
+        const authorBooks = await Book.find({
+            author: req.body?.title?.toString().trim(),
+        })
+            .sort({ numRatings: -1, rating: -1 })
+            //   .limit(50)
+            .select("_id title coverImg");
 
         if (authorBooks.length > 0) {
             console.log("Author query");
-            const user = await User.findOne( { userId: req.body?.userId?.toString() } );
+            const user = await User.findOne({
+                userId: req.body?.userId?.toString(),
+            });
 
             query = {
-                author: req.body?.title?.toString().trim() 
-            }
+                author: req.body?.title?.toString().trim(),
+            };
         }
-            
+
         if (req.body?.genres?.length > 0) {
-            query.genres = { '$all': req.body.genres.map((genre) => genre.toLowerCase()) };
+            query.genres = {
+                $all: req.body.genres.map((genre) => genre.toLowerCase()),
+            };
         }
 
         if (req.body?.from) {
-            query.publishDate = { '$gte': new Date(req.body.from, 0, 1) };
-        }
-        
-        if (req.body?.to) {
-            query.publishDate = { ...query.publishDate, '$lte': new Date(req.body.to, 11, 31) };
+            query.publishDate = { $gte: new Date(req.body.from, 0, 1) };
         }
 
-        if (req.body?.rating)  {
+        if (req.body?.to) {
+            query.publishDate = {
+                ...query.publishDate,
+                $lte: new Date(req.body.to, 11, 31),
+            };
+        }
+
+        if (req.body?.rating) {
             const ratingNumber = Number(req.body.rating);
 
-            query.rating = { '$gte': ratingNumber };
+            query.rating = { $gte: ratingNumber };
         }
 
         const data = await Book.find(query)
-                                .sort({ numRatings: -1, rating: -1 })
-                                .limit(50)
-                                .select('_id title coverImg');
+            .sort({ numRatings: -1, rating: -1 })
+            .limit(50)
+            .select("_id title coverImg");
 
-        console.log("Found " + data.length + " mathes for query: " + req.body?.title?.toString())
+        console.log("Found " + data.length + " mathes for query: " + req.body?.title?.toString());
 
         const user = res.locals?.data?.data?.user;
-        if (user)
-        {
-            const userObj = await User.findOne( { userId: user.id } );
+        if (user) {
+            const userObj = await User.findOne({ userId: user.id });
 
             populateSavedBooks(data, userObj);
         }
 
-
         res.status(200).json(data);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
-    catch(error){
-        res.status(500).json({message: error.message});
-    };
-}  
+};
 
 const populateSavedBooks = (books, user) => {
     if (user && books) {
@@ -266,7 +276,7 @@ const populateSavedBooks = (books, user) => {
     } else {
         console.error("Error populating saved books");
     }
-}
+};
 
 const populateSavedBooksAggregate = (books, user) => {
     if (user && books) {
@@ -281,14 +291,12 @@ const populateSavedBooksAggregate = (books, user) => {
     } else {
         console.error("Error populating saved books");
     }
-}
-
+};
 
 module.exports = {
     getBookInfo: getBookInfo,
     getBookByCriteria: getBookByCriteria,
     getFeaturedBooks: getFeaturedBooks,
     getPopularBooks: getPopularBooks,
-    populateSavedBooks: populateSavedBooks
-}
-
+    populateSavedBooks: populateSavedBooks,
+};
