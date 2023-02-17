@@ -1,6 +1,7 @@
 const Book = require("../models/book");
 const User = require("../models/user");
 const { getReviewsByBookId } = require("./reviewsService");
+const axios = require('axios');
 
 const getPopularBooks = async (req, res) => {
     const user = res.locals?.data?.data?.user;
@@ -80,6 +81,8 @@ const getBookInfo = async (req, res) => {
 
         const similarBooks = await getSimilarBooks(book);
 
+        const keyPhrases = await getKeyPhrases(reviews);
+
         if (user) {
             const userObj = await User.findOne( { userId: user.id } );
 
@@ -88,10 +91,12 @@ const getBookInfo = async (req, res) => {
 
         incrementVisited(book);
 
-        res.status(200).json({bookInfo: book, reviews, similarBooks, saved});
+        console.log(keyPhrases);
+
+        res.status(200).json( { bookInfo: book, reviews, similarBooks, saved, keyPhrases } );
     }
     catch(error){
-        res.status(500).json({message: error.message});
+        res.status(500).json( { message: error.message } );
     };
 }
 
@@ -103,6 +108,40 @@ const incrementVisited = async (book) => {
     catch(error){
         console.log(error.message);
     }
+}
+
+const getKeyPhrases = async (reviews) => { 
+    const reviewsList = reviews.map((review) => review.content);
+
+    const data = {
+        text: reviewsList.join(" ").toString(),
+    };
+
+    const options = {
+        method: "post",
+        url: process.env.PY_ENGINE_URL + "/process-reviews",
+        headers: { "Content-Type": "application/json" },
+        data: data,
+        timeout: 5000,
+    };
+
+    return axios(options)
+        .then((response) => {
+            console.log(response.data);
+
+            return response.data;
+        })
+        .catch((error) => {
+            if (error.response) {
+                console.error(
+                    `Error: ${error.response.status} ${error.response.data}`
+                );
+            } else if (error.request) {
+                console.error("Error: No response received");
+            } else {
+                console.error(`Error: ${error.message}`);
+            }
+        });
 }
 
 const getSimilarBooks = async (book) => {
