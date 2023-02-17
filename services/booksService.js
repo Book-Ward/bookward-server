@@ -80,7 +80,7 @@ const getBookInfo = async (req, res) => {
 
         const similarBooks = await getSimilarBooks(book);
 
-        const keyPhrases = await getKeyPhrases(reviews);
+        const keyPhrases = reviews.length > 2 ? await getKeyPhrases(reviews) : [];
 
         if (user) {
             const userObj = await User.findOne({ userId: user.id });
@@ -89,8 +89,6 @@ const getBookInfo = async (req, res) => {
         }
 
         incrementVisited(book);
-
-        console.log(keyPhrases);
 
         res.status(200).json({
             bookInfo: book,
@@ -132,7 +130,7 @@ const getKeyPhrases = async (reviews) => {
         .then((response) => {
             console.log(response.data);
 
-            return response.data;
+            return response.data.phrases;
         })
         .catch((error) => {
             if (error.response) {
