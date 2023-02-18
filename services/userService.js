@@ -64,13 +64,19 @@ const saveBook = async (req, res) => {
 };
 
 const followUser = async (req, res) => {
+    const userSupa = res.locals?.data?.data?.user;
+
     try {
-        const user = await User.findOne({ userId: req.body.userId.toString() });
+        if (!userSupa) {
+            res.status(401).json({ message: "Unauthorized" });
+            return;
+        }
+        
+        const user = await User.findOne({ userId: userSupa.id });
 
         const userToFollow = await User.findOne({
             userId: req.body.userToFollowId.toString(),
         });
-        // const userToFollow = await User.findById(req.body.userToFollowId.toString());
 
         if (!userToFollow) {
             res.status(404).json({ success: false, message: "User not found" });

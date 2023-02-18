@@ -21,12 +21,19 @@ const getBookReviews = async (req, res) => {
 };
 
 const postBookReview = async (req, res) => {
+    const user = res.locals?.data?.data?.user;
+
     try {
-        const user = await User.findOne({ userId: req.body.userId.toString() });
+        if (!user) {
+            res.status(401).json({ message: "Unauthorized" });
+            return;
+        }
+
+        const userObj = await User.findOne({ userId: user.id });
 
         const expandedData = {
             ...req.body,
-            userId: user._id,
+            userId: userObj._id,
             date: Date.now(),
         };
 
@@ -34,8 +41,8 @@ const postBookReview = async (req, res) => {
             await Review.create(expandedData)
         ).populate("userId");
 
-        user.reviews.push(createdReview._id);
-        user.save();
+        userObj.reviews.push(createdReview._id);
+        userObj.save();
 
         res.status(200).json(createdReview);
     } catch (error) {
@@ -59,10 +66,16 @@ const deleteBookReview = async (req, res) => {
 const upvoteBookReview = async (req, res) => {
     try {
         const review = await Review.findOne(req.params.reviewId.toString());
+        const user = res.locals?.data?.data?.user;
 
-        const user = await User.find({ userId: req.body.userId.toString() });
+        if (!user) {
+            res.status(401).json({ message: "Unauthorized" });
+            return;
+        }
 
-        if (user.upvotedReviews.includes(review._id.toString())) {
+        const userObj = await User.find({ userId: user.id });
+
+        if (userObj.upvotedReviews.includes(review._id.toString())) {
             res.status(400).json({
                 message: "User has already upvoted this review",
             });

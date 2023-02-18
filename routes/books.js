@@ -12,7 +12,8 @@ const {
 } = require("../services/booksService")
 
 router.post('/books/:page', supabase_middleware, getPopularBooks);
-router.get('/featured/:userId', getFeaturedBooks);
+router.post('/books/:page', supabase_middleware, getPopularBooks);
+router.get('/featured', supabase_middleware, getFeaturedBooks);
 router.get('/book/:bookId', supabase_middleware, getBookInfo);
 router.post('/book/search', supabase_middleware, getBookByCriteria);
 

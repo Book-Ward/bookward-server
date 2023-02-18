@@ -19,7 +19,7 @@ const {
 
 router.post("/users/:userId", supabase_middleware, getUserInfo);
 router.post("/saveBook", supabase_middleware, saveBook);
-router.post("/followUser", userMiddleware, followUser);
+router.post("/followUser", supabase_middleware, followUser);
 router.get("/searchUsers/:username", supabase_middleware, searchUsers);
 router.get("/followingUsers", supabase_middleware, getFollowing)
 

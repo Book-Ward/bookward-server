@@ -50,17 +50,21 @@ const getPopularBooks = async (req, res) => {
 };
 
 const getFeaturedBooks = async (req, res) => {
+    const user = res.locals?.data?.data?.user;
+
     try {
         const data = await Book.find()
             .sort({ visited: -1, rating: -1 })
             .limit(8)
             .select("_id title coverImg genres");
 
-        const user = await User.findOne({
-            userId: req.params?.userId?.toString(),
-        });
-
-        populateSavedBooks(data, user);
+        if (user) {
+            const userObj = await User.findOne({
+                userId: user.id,
+            });
+    
+            populateSavedBooks(data, userObj);
+        }
 
         res.status(200).json(data);
     } catch (error) {
