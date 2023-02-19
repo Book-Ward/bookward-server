@@ -213,9 +213,6 @@ const getBookByCriteria = async (req, res) => {
 
         if (authorBooks.length > 0) {
             console.log("Author query");
-            const user = await User.findOne({
-                userId: req.body?.userId?.toString(),
-            });
 
             query = {
                 author: req.body?.title?.toString().trim(),

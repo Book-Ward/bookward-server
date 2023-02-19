@@ -5,7 +5,7 @@ const {
     reviewMiddleware,
     reviewOwnershipMiddleware
 } = require("../middlewares/middleware")
-const supabase_middleware = require('../middlewares/supabaseMiddleware');
+const supabase_middleware = require('../middlewares/authenticationMiddleware');
 const {
     getBookReviews,
     postBookReview,

@@ -3,7 +3,7 @@ const router = express.Router()
 const {
     bookMiddleware,
 } = require("../middlewares/middleware");
-const supabase_middleware = require('../middlewares/supabaseMiddleware');
+const supabase_middleware = require('../middlewares/authenticationMiddleware');
 const {
     getBookInfo,
     getBookByCriteria,
