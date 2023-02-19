@@ -9,6 +9,12 @@ const getFullUserInfo = async (userId) => {
     return user;
 }
 
+const getUser = async (userId) => {
+    const user = await userRepository.getUserById(userId);
+
+    return user;
+}
+
 const saveBook = async (userId, bookId) => {
     const user = await userRepository.getUserById(userId);
 
@@ -114,4 +120,5 @@ module.exports = {
     followUser,
     searchForUsers,
     getFollowingByUser,
+    getUser,
 };
