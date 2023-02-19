@@ -1,6 +1,6 @@
-const User = require('../models/user')
-const Review = require('../models/review')
-const Book = require('../models/book')
+const User = require('../data-access/models/user')
+const Review = require('../data-access/models/review')
+const Book = require('../data-access/models/book')
 
 const userMiddleware = async (req, res, next) => {
     const userId = req.body?.userId?.toString()

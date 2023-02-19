@@ -1,21 +1,16 @@
 const express = require('express');
 const router = express.Router()
 const {
-    userMiddleware,
     reviewMiddleware,
     reviewOwnershipMiddleware
 } = require("../middlewares/middleware")
-const supabase_middleware = require('../middlewares/authenticationMiddleware');
-const {
-    getBookReviews,
-    postBookReview,
-    deleteBookReview,
-    upvoteBookReview
-} = require("../services/reviewsService")
+const supabase_middleware = require('../middlewares/authentication-middleware');
+const reviewsController = require("../controllers/reviews-controller");
 
-router.get("/reviews/:bookId", getBookReviews);
-router.post("/reviews", supabase_middleware, postBookReview);
-router.delete("/reviews/:bookId", reviewOwnershipMiddleware, deleteBookReview);
-router.put("/reviews/upvote/:reviewId", reviewMiddleware, supabase_middleware, upvoteBookReview);
+
+router.get("/reviews/:bookId", reviewsController.getBookReviews);
+router.post("/reviews", supabase_middleware, reviewsController.postBookReview);
+router.delete("/reviews/:bookId", reviewOwnershipMiddleware, reviewsController.deleteBookReview);
+router.put("/reviews/upvote/:reviewId", reviewMiddleware, supabase_middleware, reviewsController.upvoteBookReview);
 
 module.exports = router;
