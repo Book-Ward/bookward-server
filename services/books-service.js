@@ -1,7 +1,13 @@
 const booksRepository = require("../data-access/repositories/book-repository");
 const { getUserById } = require("../data-access/repositories/user-repository");
-const { getReviewsByBookId } = require("./reviews-service");
+const { getReviewsForBook } = require("./reviews-service");
 const axios = require("axios");
+
+const getBookById = async (bookId) => {
+    const book = await booksRepository.getBookById(bookId);
+
+    return book;
+};
 
 const getHighestRatedBooks = async (user, skip) => {
     const data = await booksRepository.getPopularBooksAggregate(skip);
@@ -30,7 +36,7 @@ const getMostVisitedBooks = async (user) => {
 const getAllBookInfo = async (bookId, user) => {
     const book = await booksRepository.getBookById(bookId);
 
-    const reviews = await getReviewsByBookId(bookId);
+    const reviews = await getReviewsForBook(bookId);
 
     const similarBooks = await getSimilarBooks(book);
 
@@ -96,9 +102,9 @@ const getKeyPhrases = async (reviews) => {
                     `Error: ${error.response.status} ${error.response.data}`
                 );
             } else if (error.request) {
-                console.error("Error: No response received");
+                console.error("Error from py-engine: No response received");
             } else {
-                console.error(`Error: ${error.message}`);
+                console.error(`Error from py-engine: ${error.message}`);
             }
 
             return [];
@@ -114,24 +120,9 @@ const incrementVisited = async (book) => {
 };
 
 const getBooksByFilters = async (filters, user) => {
-    let query = {
-        title: {
-            $regex: filters.title?.toString().trim(),
-            $options: "i",
-        },
-    };
+    const content = filters.title?.toString().trim();
 
-    const authorBooks = await booksRepository.getBooksByQuery({
-        author: filters.title?.toString().trim(),
-    });
-
-    if (authorBooks.length > 0) {
-        console.log("Author query");
-
-        query = {
-            author: filters.title?.toString().trim(),
-        };
-    }
+    const query = await defineSearchQuery(content);
 
     if (filters.genres?.length > 0) {
         query.genres = {
@@ -167,6 +158,29 @@ const getBooksByFilters = async (filters, user) => {
     }
 
     return data;
+};
+
+const defineSearchQuery = async (content) => {
+
+    const authorBooks = await booksRepository.getBooksByQuery({
+        author: content,
+    });
+
+    if (authorBooks.length > 0) {
+        console.log("Author query");
+
+        return {
+            author: content,
+        };
+    }
+
+    return {
+        title: {
+            $regex: content,
+            $options: "i",
+        },
+    };
+
 };
 
 const populateSavedBooks = (books, user) => {
@@ -206,4 +220,5 @@ module.exports = {
     getBooksByFilters,
     populateSavedBooks,
     populateSavedBooksAggregate,
+    getBookById,
 };

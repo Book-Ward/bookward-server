@@ -1,172 +1,117 @@
-const User = require("../data-access/models/user");
-const Book = require("../data-access/models/book");
+const userRepository = require("../data-access/repositories/user-repository");
 const booksService = require("./books-service");
 
-const getUserInfo = async (req, res) => {
-    try {
-        const user = res.locals?.data?.data?.user;
+const getFullUserInfo = async (userId) => {
+    const user = await userRepository.getFullUserById(userId);
 
-        if (!user) {
-            res.status(401).json({ message: "Unauthorized" });
-            return;
-        }
+    booksService.populateSavedBooks(user.savedBooks, user);
 
-        const userObj = await User.findOne({ userId: user.id }).populate(
-            "savedBooks reviews following followers"
+    return user;
+}
+
+const saveBook = async (userId, bookId) => {
+    const user = await userRepository.getUserById(userId);
+
+    if (!user) {
+        throw new Error("User not found");
+    }
+
+    const book = await booksService.getBookById(bookId);
+
+    if (!book) {
+        throw new Error("Book not found");
+    }
+
+    await saveUnsaveBook(user, book);
+
+    return user;
+}
+
+const saveUnsaveBook = async (user, book) => {
+    if (user.savedBooks.includes(book._id)) {
+
+        user.savedBooks = user.savedBooks.filter(
+            (bookId) => bookId.toString() !== book._id.toString()
+        );
+    }
+    else {
+        user.savedBooks.push(book._id);
+    }
+
+    await user.save();
+}
+
+const followUser = async (userId, reqUserId) => {
+
+    const user = await userRepository.getUserById(userId);
+
+    const userToFollow = await userRepository.getUserById(reqUserId);
+
+    if (!userToFollow || !user) {
+        throw new Error("User not found");
+    }
+
+    if (user._id.toString() === userToFollow._id.toString()) {
+        throw new Error("You cannot follow yourself");
+    }
+
+    if (user.following.includes(userToFollow._id)) {
+        user.following = user.following.filter(
+            (userId) => userId.toString() !== userToFollow._id.toString()
         );
 
-        booksService.populateSavedBooks(userObj.savedBooks, userObj);
-
-        res.status(200).json(userObj);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
-
-const saveBook = async (req, res) => {
-    try {
-        const user = res.locals?.data?.data?.user;
-
-        if (!user) {
-            res.status(401).json({ message: "Unauthorized" });
-            return;
-        }
-
-        const userObj = await User.findOne({ userId: user.id });
-
-        const book = await Book.findById(req.body.bookId.toString());
-
-        if (!book) {
-            res.status(404).json({ success: false, message: "Book not found" });
-
-            return;
-        }
-
-        // Unsave book
-        if (userObj.savedBooks.includes(book._id)) {
-            userObj.savedBooks = userObj.savedBooks.filter(
-                (bookId) => bookId.toString() !== book._id.toString()
-            );
-        }
-        // Save book
-        else {
-            userObj.savedBooks.push(book._id);
-        }
-
-        await userObj.save();
-
-        res.status(200).json({ success: true, data: userObj });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
-
-const followUser = async (req, res) => {
-    const userSupa = res.locals?.data?.data?.user;
-
-    try {
-        if (!userSupa) {
-            res.status(401).json({ message: "Unauthorized" });
-            return;
-        }
-        
-        const user = await User.findOne({ userId: userSupa.id });
-
-        const userToFollow = await User.findOne({
-            userId: req.body.userToFollowId.toString(),
-        });
-
-        if (!userToFollow) {
-            res.status(404).json({ success: false, message: "User not found" });
-
-            return;
-        }
-
-        if (user._id.toString() === userToFollow._id.toString()) {
-            res.status(405).json({
-                success: false,
-                message: "You cannot follow yourself",
-            });
-
-            return;
-        }
-
-        if (user.following.includes(userToFollow._id)) {
-            user.following = user.following.filter(
-                (userId) => userId.toString() !== userToFollow._id.toString()
-            );
-
-            user.followers = user.followers.filter(
-                (userId) => userId.toString() !== user._id.toString()
-            );
-        } else {
-            user.following.push(userToFollow._id);
-
-            userToFollow.followers.push(user._id);
-        }
-
-        await user.save();
-
-        await userToFollow.save();
-
-        res.status(200).json({ success: true, data: user });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
-
-const searchUsers = async (req, res) => {
-    try {
-        const users = await User.find({
-            name: { $regex: req.params.username, $options: "i" },
-        })
-            .limit(10)
-            .select("name userId");
-
-        console.log("Found " + users.length + " matches for query: " + req.params.username);
-
-        if (res.locals?.data?.data?.user) {
-            const { data } = res?.locals?.data;
-
-            const searcher = await User.findOne({ userId: data.user.id });
-
-            users.forEach((user, idx) => {
-                if (searcher.following.includes(user._id)) {
-                    users[idx] = { ...user._doc, isFollowing: true };
-                }
-            });
-        }
-
-        res.status(200).json(users);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-};
-
-const getFollowing = async (req, res) => {
-    try {
-        const user = res.locals?.data?.data?.user;
-
-        if (!user) {
-            res.status(401).json({ message: "Unauthorized" });
-            return;
-        }
-
-        const userObj = await User.findOne({ userId: user.id }).populate(
-            "following",
-            "userId name"
+        user.followers = user.followers.filter(
+            (userId) => userId.toString() !== user._id.toString()
         );
+    } else {
+        user.following.push(userToFollow._id);
 
-        res.status(200).json({ success: true, data: userObj.following });
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+        userToFollow.followers.push(user._id);
     }
+
+    await user.save();
+
+    await userToFollow.save();
+
+    return user;
+}
+
+const searchForUsers = async (query, user) => {
+    const users = await userRepository.searchUsersByUsername(query);
+
+    console.log("Found " + users.length + " matches for query: " + query);
+
+    if (users.length === 0) {
+        return users;
+    }
+
+    if (user) {
+        const searcher = await userRepository.getUserById(user.id);
+
+        populateFollowingUsers(users, searcher)
+    }
+
+    return users;
+};
+
+const populateFollowingUsers = (users, searcher) => {
+    users.forEach((user, idx) => {
+        if (searcher.following.includes(user._id)) {
+            users[idx] = { ...user._doc, isFollowing: true };
+        }
+    });
+};
+
+const getFollowingByUser = async (userId) => {
+    const user = await userRepository.getFullUserById(userId);
+
+    return user.following;
 };
 
 module.exports = {
-    getUserInfo,
+    getFullUserInfo,
     saveBook,
     followUser,
-    searchUsers,
-    getFollowing,
+    searchForUsers,
+    getFollowingByUser,
 };

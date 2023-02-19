@@ -1,24 +1,18 @@
 const express = require('express');
 const router = express.Router()
 const supabase_middleware = require('../middlewares/authentication-middleware');
-const {
-    getUserInfo,
-    saveBook,
-    followUser,
-    searchUsers,
-    getFollowing,
-} = require("../services/users-service")
+const usersController = require('../controllers/users-controller');
 const {
     sendRecommendation,
     getUnseenRecommendations,
     acknowledgeRecommendation,
 } = require("../services/recommendations-service")
 
-router.post("/users/:userId", supabase_middleware, getUserInfo);
-router.post("/saveBook", supabase_middleware, saveBook);
-router.post("/followUser", supabase_middleware, followUser);
-router.get("/searchUsers/:username", supabase_middleware, searchUsers);
-router.get("/followingUsers", supabase_middleware, getFollowing)
+router.post("/users/:userId", supabase_middleware, usersController.getUserInfo);
+router.post("/saveBook", supabase_middleware, usersController.saveBook);
+router.post("/followUser", supabase_middleware, usersController.followUser);
+router.get("/searchUsers/:username", supabase_middleware, usersController.searchUsers);
+router.get("/followingUsers", supabase_middleware, usersController.getFollowing)
 
 router.post("/recommend/:id", supabase_middleware, sendRecommendation);
 router.get("/recommendations", supabase_middleware, getUnseenRecommendations);

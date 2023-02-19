@@ -1,100 +1,68 @@
-const Review = require("../data-access/models/review");
-const User = require("../data-access/models/user");
+const reivewsRepository = require('../data-access/repositories/review-repository');
+const userRepository = require('../data-access/repositories/user-repository');
 
-const getReviewsByBookId = async (bookId) => {
-    const data = await Review.find({ bookId: bookId })
-        .sort({ date: -1 })
-        .populate("userId")
-        .limit(20);
+const getReviewsForBook = async (bookId) => {
+    const data = await reivewsRepository.getReviewsByBookId(bookId);
 
     return data;
 };
 
-const getBookReviews = async (req, res) => {
-    try {
-        const data = await getReviewsByBookId(req.params.bookId.toString());
+const createReview = async (reviewBody, user) => {
+    const userObj = await userRepository.getUserById(user.id);
 
-        res.status(200).json(data);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
+    const expandedData = {
+        ...reviewBody,
+        userId: userObj._id,
+        date: Date.now(),
+    };
+
+    const createdReview = await reivewsRepository.createReview(expandedData);
+
+    userObj.reviews.push(createdReview._id);
+    userObj.save();
+
+    return createdReview;
 };
 
-const postBookReview = async (req, res) => {
-    const user = res.locals?.data?.data?.user;
+const deleteReview = async (user, reviewId) => {
+    const review = await reivewsRepository.getReviewById(reviewId);
 
-    try {
-        if (!user) {
-            res.status(401).json({ message: "Unauthorized" });
-            return;
-        }
-
-        const userObj = await User.findOne({ userId: user.id });
-
-        const expandedData = {
-            ...req.body,
-            userId: userObj._id,
-            date: Date.now(),
-        };
-
-        const createdReview = await (
-            await Review.create(expandedData)
-        ).populate("userId");
-
-        userObj.reviews.push(createdReview._id);
-        userObj.save();
-
-        res.status(200).json(createdReview);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+    if (review.userId.toString() !== user.id) {
+        throw new Error('Unauthorized');
     }
+
+    await reivewsRepository.deleteReview(reviewId);
 };
 
-const deleteBookReview = async (req, res) => {
-    try {
-        // TODO: validate the author of the review is the same as the user making the request
-        const data = await Review.findByIdAndDelete(
-            req.params.bookId.toString()
-        );
-
-        res.status(200).json(data);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+const upvoteReview = async (reviewId, user) => {
+    if (!user) {
+        throw new Error('Unauthorized');
     }
-};
 
-const upvoteBookReview = async (req, res) => {
-    try {
-        const review = await Review.findOne(req.params.reviewId.toString());
-        const user = res.locals?.data?.data?.user;
+    const review = await reivewsRepository.getReviewById(reviewId);
 
-        if (!user) {
-            res.status(401).json({ message: "Unauthorized" });
-            return;
-        }
-
-        const userObj = await User.find({ userId: user.id });
-
-        if (userObj.upvotedReviews.includes(review._id.toString())) {
-            res.status(400).json({
-                message: "User has already upvoted this review",
-            });
-        } else {
-            const data = await Review.findByIdAndUpdate(
-                req.params.reviewId.toString(),
-                { $inc: { helpful: 1 } }
-            );
-            res.status(200).json(data);
-        }
-    } catch (error) {
-        res.status(500).json({ message: error.message });
+    if (review.userId.toString() === user.id) {
+        throw new Error('Unauthorized');
     }
-};
+
+    const userObj = await userRepository.getUserById(user.id);
+
+    if (userObj.upvotedReviews.includes(review._id.toString())) {
+        throw new Error('User has already upvoted this review');
+    }
+
+    review.helpful += 1;
+    review.save(); 
+
+    userObj.upvotedReviews.push(review._id);
+    userObj.save();
+
+    return review;
+}
 
 module.exports = {
-    getReviewsByBookId: getReviewsByBookId,
-    getBookReviews: getBookReviews,
-    postBookReview: postBookReview,
-    deleteBookReview: deleteBookReview,
-    upvoteBookReview: upvoteBookReview,
-};
+    getReviewsForBook,
+    createReview,
+    deleteReview,
+    upvoteReview,
+}
