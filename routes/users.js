@@ -1,21 +1,18 @@
 const express = require('express');
 const router = express.Router()
-const {
-    userMiddleware
-} = require("../middlewares/middleware");
-const supabase_middleware = require('../middlewares/authenticationMiddleware');
+const supabase_middleware = require('../middlewares/authentication-middleware');
 const {
     getUserInfo,
     saveBook,
     followUser,
     searchUsers,
     getFollowing,
-} = require("../services/userService")
+} = require("../services/users-service")
 const {
     sendRecommendation,
     getUnseenRecommendations,
     acknowledgeRecommendation,
-} = require("../services/recommendationService")
+} = require("../services/recommendations-service")
 
 router.post("/users/:userId", supabase_middleware, getUserInfo);
 router.post("/saveBook", supabase_middleware, saveBook);

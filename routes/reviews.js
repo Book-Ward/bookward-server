@@ -1,17 +1,16 @@
 const express = require('express');
 const router = express.Router()
 const {
-    userMiddleware,
     reviewMiddleware,
     reviewOwnershipMiddleware
 } = require("../middlewares/middleware")
-const supabase_middleware = require('../middlewares/authenticationMiddleware');
+const supabase_middleware = require('../middlewares/authentication-middleware');
 const {
     getBookReviews,
     postBookReview,
     deleteBookReview,
     upvoteBookReview
-} = require("../services/reviewsService")
+} = require("../services/reviews-service")
 
 router.get("/reviews/:bookId", getBookReviews);
 router.post("/reviews", supabase_middleware, postBookReview);

@@ -1,5 +1,5 @@
-const Recommendation = require("../models/recommendation");
-const User = require("../models/user");
+const Recommendation = require("../data-access/models/recommendation");
+const User = require("../data-access/models/user");
 
 const sendRecommendation = async (req, res) => {
     try {

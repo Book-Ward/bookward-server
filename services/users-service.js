@@ -1,7 +1,6 @@
-const User = require("../models/user");
-const Book = require("../models/book");
-const booksService = require("./booksService");
-const supabase_middleware = require("../middlewares/authenticationMiddleware");
+const User = require("../data-access/models/user");
+const Book = require("../data-access/models/book");
+const booksService = require("./books-service");
 
 const getUserInfo = async (req, res) => {
     try {
@@ -16,7 +15,6 @@ const getUserInfo = async (req, res) => {
             "savedBooks reviews following followers"
         );
 
-        // TODO: It is not working
         booksService.populateSavedBooks(userObj.savedBooks, userObj);
 
         res.status(200).json(userObj);

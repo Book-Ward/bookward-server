@@ -1,5 +1,5 @@
-const Review = require("../models/review");
-const User = require("../models/user");
+const Review = require("../data-access/models/review");
+const User = require("../data-access/models/user");
 
 const getReviewsByBookId = async (bookId) => {
     const data = await Review.find({ bookId: bookId })

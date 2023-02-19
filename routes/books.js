@@ -1,20 +1,11 @@
 const express = require('express');
 const router = express.Router()
-const {
-    bookMiddleware,
-} = require("../middlewares/middleware");
-const supabase_middleware = require('../middlewares/authenticationMiddleware');
-const {
-    getBookInfo,
-    getBookByCriteria,
-    getFeaturedBooks,
-    getPopularBooks
-} = require("../services/booksService")
+const supabase_middleware = require('../middlewares/authentication-middleware');
+const booksController = require("../controllers/books-controller");
 
-router.post('/books/:page', supabase_middleware, getPopularBooks);
-router.post('/books/:page', supabase_middleware, getPopularBooks);
-router.get('/featured', supabase_middleware, getFeaturedBooks);
-router.get('/book/:bookId', supabase_middleware, getBookInfo);
-router.post('/book/search', supabase_middleware, getBookByCriteria);
+router.post('/books/:page', supabase_middleware, booksController.getPopularBooks);
+router.get('/featured', supabase_middleware, booksController.getFeaturedBooks);
+router.get('/book/:bookId', supabase_middleware, booksController.getBookInfo);
+router.post('/book/search', supabase_middleware, booksController.getBookByCriteria);
 
 module.exports = router;
