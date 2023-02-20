@@ -3,9 +3,6 @@ const router = express.Router()
 const supabase_middleware = require('../middlewares/authentication-middleware');
 const usersController = require('../controllers/users-controller');
 const recommendationsController = require('../controllers/recommendations-controller');
-const supabase_middleware = require('../middlewares/authentication-middleware');
-const usersController = require('../controllers/users-controller');
-const recommendationsController = require('../controllers/recommendations-controller');
 
 router.get("/users/info/:userId", supabase_middleware, usersController.getUserInfo);
 router.post("/users", usersController.createUser);
