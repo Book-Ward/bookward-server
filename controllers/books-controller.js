@@ -3,7 +3,7 @@ const booksService = require("../services/books-service");
 const getPopularBooks = async (req, res) => {
     try {
         const user = res.locals?.data?.data?.user;
-        const page = req.params?.page?.toString() || 1;
+        const page = req.query?.page?.toString() || 1;
         const skip = (page - 1) * 50;
 
         const data = await booksService.getHighestRatedBooks(user, skip);

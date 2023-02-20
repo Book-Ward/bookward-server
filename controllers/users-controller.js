@@ -20,7 +20,7 @@ const getUserInfo = async (req, res) => {
 const saveBook = async (req, res) => {
     try {
         const user = res.locals?.data?.data?.user;
-        const bookId = req.body.bookId.toString();
+        const bookId = req.params?.bookId?.toString();
 
         if (!user) {
             res.status(401).json({ message: "Unauthorized" });
@@ -34,6 +34,22 @@ const saveBook = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+const createUser = async (req, res) => {
+    try {
+        const data = {
+            userId: req.body?.userId?.toString(),
+            email: req.body?.email?.toString(),
+            name: req.body?.nickname.toString(),
+        }
+
+        await userService.saveUser(data);
+
+        res.status(200).json({ success: true });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+}
 
 const followUser = async (req, res) => {
     const user = res.locals?.data?.data?.user;
@@ -55,10 +71,10 @@ const followUser = async (req, res) => {
 
 const searchUsers = async (req, res) => {
     const user = res.locals?.data?.data?.user;
-    const query = req.params?.username?.toString();
+    const username = req.query.username?.toString();
 
     try {
-        const users = await userService.searchForUsers(query, user);
+        const users = await userService.searchForUsers(username, user);
 
         res.status(200).json(users);
     } catch (error) {
@@ -89,4 +105,5 @@ module.exports = {
     followUser,
     searchUsers,
     getFollowing,
+    createUser,
 };

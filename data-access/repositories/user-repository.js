@@ -6,6 +6,10 @@ const getUserById = async (userId) => {
     return user;
 };
 
+const createUser = async (user) => {
+    await User.create(user);
+}
+
 const getFullUserById = async (userId) => {
     const user = await User.findOne({ userId: userId }).populate(
         "savedBooks reviews following followers"
@@ -28,4 +32,5 @@ module.exports = {
     getUserById,
     getFullUserById,
     searchUsersByUsername,
+    createUser,
 };
