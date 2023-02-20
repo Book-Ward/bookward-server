@@ -7,11 +7,13 @@ const getReviewsForBook = async (bookId) => {
     return data;
 };
 
-const createReview = async (reviewBody, user) => {
+const createReview = async (bookId, rating, content, user) => {
     const userObj = await userRepository.getUserById(user.id);
 
     const expandedData = {
-        ...reviewBody,
+        bookId,
+        rating,
+        content,
         userId: userObj._id,
         date: Date.now(),
     };

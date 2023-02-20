@@ -15,6 +15,10 @@ const getUser = async (userId) => {
     return user;
 }
 
+const saveUser = async (user) => {
+    await userRepository.saveUser(user);
+}
+
 const saveBook = async (userId, bookId) => {
     const user = await userRepository.getUserById(userId);
 
@@ -121,4 +125,5 @@ module.exports = {
     searchForUsers,
     getFollowingByUser,
     getUser,
+    saveUser,
 };

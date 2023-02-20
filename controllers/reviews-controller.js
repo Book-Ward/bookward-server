@@ -1,7 +1,7 @@
 const reviewsService = require("../services/reviews-service");
 
 const getBookReviews = async (req, res) => {
-    const bookId = req.params.bookId.toString();
+    const bookId = req.params?.bookId?.toString();
 
     try {
         const data = await reviewsService.getReviewsForBook(bookId);
@@ -14,7 +14,9 @@ const getBookReviews = async (req, res) => {
 
 const postBookReview = async (req, res) => {
     const user = res.locals?.data?.data?.user;
-    const reviewBody = req.body;
+    const bookId = req.params?.bookId?.toString();
+    const rating = req.body?.rating;
+    const content = req.body?.content;
 
     try {
         if (!user) {
@@ -22,7 +24,7 @@ const postBookReview = async (req, res) => {
             return;
         }
 
-        const review = await reviewsService.createReview(reviewBody, user);
+        const review = await reviewsService.createReview(bookId, rating, content, user);
 
         res.status(200).json(review);
     } catch (error) {
