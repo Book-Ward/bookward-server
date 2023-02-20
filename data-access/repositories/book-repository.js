@@ -15,7 +15,7 @@ const getBooksByQuery = async (query, limit) => {
     return data;
 };
 
-const getPopularBooksAggregate = async (skip) => {
+const getPopularBooksAggregate = async (offset, limit) => {
     const agg = Book.aggregate([
         {
             $addFields: {
@@ -31,10 +31,10 @@ const getPopularBooksAggregate = async (skip) => {
             $sort: { combinedScore: -1 },
         },
         {
-            $skip: skip,
+            $skip: offset,
         },
         {
-            $limit: 50,
+            $limit: limit,
         },
     ]);
 

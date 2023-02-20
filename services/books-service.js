@@ -10,7 +10,7 @@ const getBookById = async (bookId) => {
 };
 
 const getHighestRatedBooks = async (user, skip) => {
-    const data = await booksRepository.getPopularBooksAggregate(skip);
+    const data = await booksRepository.getPopularBooksAggregate(skip, 50);
 
     if (user) {
         const userObj = await getUserById(user.id);
@@ -84,7 +84,7 @@ const getKeyPhrases = async (reviews) => {
 
     const options = {
         method: "post",
-        url: process.env.PY_ENGINE_URL + "/process-reviews",
+        url: process.env.PY_ENGINE_URL + "/reviews/process",
         headers: { "Content-Type": "application/json" },
         data: { text: reviewsList.join(" ").toString() },
         timeout: 5000,

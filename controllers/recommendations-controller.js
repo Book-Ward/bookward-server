@@ -19,10 +19,7 @@ const sendRecommendation = async (req, res) => {
             return;
         }
 
-        const recommendationObj = recommendationsService.sendRecommendationToUser(user.id, receiverId, bookId, message).catch((err) => {
-            res.status(500).json({ message: err.message });
-            return;
-        });
+        const recommendationObj = await recommendationsService.sendRecommendationToUser(user.id, receiverId, bookId, message);
 
         res.status(200).json({ success: true, data: recommendationObj });
     } catch (error) {
