@@ -16,7 +16,7 @@ const getUser = async (userId) => {
 }
 
 const saveUser = async (user) => {
-    await userRepository.saveUser(user);
+    await userRepository.createUser(user);
 }
 
 const saveBook = async (userId, bookId) => {

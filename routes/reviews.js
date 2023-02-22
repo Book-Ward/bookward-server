@@ -11,6 +11,6 @@ const reviewsController = require("../controllers/reviews-controller");
 router.get("/books/:bookId/reviews", reviewsController.getBookReviews);
 router.post("/books/:bookId/reviews", supabase_middleware, reviewsController.postBookReview);
 router.delete("/books/:bookId/reviews", reviewOwnershipMiddleware, reviewsController.deleteBookReview);
-router.put("/reviews/:reviewId/upvote", reviewMiddleware, supabase_middleware, reviewsController.upvoteBookReview);
+router.put("/reviews/:reviewId/upvoted", reviewMiddleware, supabase_middleware, reviewsController.upvoteBookReview);
 
 module.exports = router;

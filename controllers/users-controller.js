@@ -40,7 +40,7 @@ const createUser = async (req, res) => {
         const data = {
             userId: req.body?.userId?.toString(),
             email: req.body?.email?.toString(),
-            name: req.body?.nickname.toString(),
+            name: req.body?.username?.toString(),
         }
 
         await userService.saveUser(data);

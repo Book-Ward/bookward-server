@@ -84,7 +84,7 @@ const getKeyPhrases = async (reviews) => {
 
     const options = {
         method: "post",
-        url: process.env.PY_ENGINE_URL + "/reviews/process",
+        url: process.env.PY_ENGINE_URL + "/key-phrases/extract",
         headers: { "Content-Type": "application/json" },
         data: { text: reviewsList.join(" ").toString() },
         timeout: 5000,

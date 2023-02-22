@@ -11,8 +11,8 @@ router.post("/users/followed", supabase_middleware, usersController.followUser);
 router.get("/users/search", supabase_middleware, usersController.searchUsers);
 router.get("/users/following", supabase_middleware, usersController.getFollowing)
 
-router.post("/recommend/:userId", supabase_middleware, recommendationsController.sendRecommendation);
+router.post("/recommendations", supabase_middleware, recommendationsController.sendRecommendation);
 router.get("/recommendations", supabase_middleware, recommendationsController.getUnseenRecommendations);
-router.post("/recommendation/:id/acknowledged", supabase_middleware, recommendationsController.acknowledgeRecommendation);
+router.post("/recommendations/:id/acknowledged", supabase_middleware, recommendationsController.acknowledgeRecommendation);
 
 module.exports = router;

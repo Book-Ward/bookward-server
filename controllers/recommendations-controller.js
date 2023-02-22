@@ -3,7 +3,7 @@ const recommendationsService = require("../services/recommendations-service")
 const sendRecommendation = async (req, res) => {
     try {
         const user = res.locals?.data?.data?.user;
-        const receiverId = req.params?.userId;
+        const receiverId = req.body?.userId;
         const bookId = req.body?.bookId;
         const message = req.body?.message;
 
