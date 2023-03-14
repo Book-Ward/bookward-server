@@ -1,5 +1,6 @@
 const booksService = require("../services/books-service");
 
+// Returns books for the explore page
 const getPopularBooks = async (req, res) => {
     try {
         const user = res.locals?.data?.data?.user;
@@ -14,6 +15,7 @@ const getPopularBooks = async (req, res) => {
     }
 };
 
+// Returns most visited books
 const getFeaturedBooks = async (req, res) => {
     const user = res.locals?.data?.data?.user;
 
@@ -26,6 +28,7 @@ const getFeaturedBooks = async (req, res) => {
     }
 };
 
+// Get additional book info
 const getBookInfo = async (req, res) => {
     const user = res.locals?.data?.data?.user;
     const bookId = req.params.bookId.toString();
@@ -39,6 +42,7 @@ const getBookInfo = async (req, res) => {
     }
 };
 
+// Search book by filters
 const getBookByCriteria = async (req, res) => {
     try {
         const filters = req?.body;

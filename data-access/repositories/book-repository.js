@@ -16,6 +16,9 @@ const getBooksByQuery = async (query, limit) => {
 };
 
 const getPopularBooksAggregate = async (offset, limit) => {
+    // Creates custom score based on rating and number of ratings
+    // 70% of the score is based on number of ratings
+    // 30% of the score is based on rating
     const agg = Book.aggregate([
         {
             $addFields: {
@@ -53,6 +56,9 @@ const getMostVisitedBooksWtihLimit = async (limit) => {
 };
 
 const getSimilarBooksAggregate = async (genres, author, title) => {
+    // Creates custom score based on genres and author
+    // 70% of the score is based on author
+    // 30% of the score is based on genres
     const agg = Book.aggregate([
         {
             $match: {

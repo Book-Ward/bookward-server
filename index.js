@@ -9,6 +9,7 @@ const { createClient } = require('@supabase/supabase-js')
 
 const app = express();
 
+// Initialize Supabase instance
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_KEY, {})
 
 app.set("supabase", supabase)
@@ -22,6 +23,7 @@ app.use(
   })
 );
 
+// Initialize CORS middleware for client app URL
 app.use((req, res, next) => {
   const allowedOrigins = [
     process.env.CLIENT_APP_URL,
@@ -40,8 +42,11 @@ app.use((req, res, next) => {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+// Add api routes
 app.use('/api', booksRouter, reviewsRouter, userRouter);
 
+// Connect to MongoDB database and start server
 mongoose
   .connect(process.env.MONGODB_URI, {
     useNewUrlParser: true,

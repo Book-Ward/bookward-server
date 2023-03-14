@@ -65,6 +65,7 @@ const followUser = async (userId, reqUserId) => {
         throw new Error("You cannot follow yourself");
     }
 
+    // If the user is already following the user to follow, unfollow them
     if (user.following.includes(userToFollow._id)) {
         user.following = user.following.filter(
             (userId) => userId.toString() !== userToFollow._id.toString()
@@ -73,6 +74,7 @@ const followUser = async (userId, reqUserId) => {
         user.followers = user.followers.filter(
             (userId) => userId.toString() !== user._id.toString()
         );
+    // Otherwise, follow them
     } else {
         user.following.push(userToFollow._id);
 
@@ -104,6 +106,7 @@ const searchForUsers = async (query, user) => {
     return users;
 };
 
+// Populate isFollowing property for each user
 const populateFollowingUsers = (users, searcher) => {
     users.forEach((user, idx) => {
         if (searcher.following.includes(user._id)) {

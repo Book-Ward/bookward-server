@@ -183,6 +183,8 @@ const defineSearchQuery = async (content) => {
 
 };
 
+// Add liked status to every book
+// Depending on if the user has saved it
 const populateSavedBooks = (books, user) => {
     if (user && books) {
         const savedBooks = user.savedBooks;
@@ -198,6 +200,8 @@ const populateSavedBooks = (books, user) => {
     }
 };
 
+// Add liked status to every book
+// Depending on if the user has saved it
 const populateSavedBooksAggregate = (books, user) => {
     if (user && books) {
         const savedBooks = user.savedBooks;

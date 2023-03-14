@@ -44,6 +44,8 @@ const getUnseenRecommendations = async (req, res) => {
     }
 };
 
+// When a recommendation is clicked on the UI
+// A request is sent to this endpoint to mark the recommendation as seen
 const acknowledgeRecommendation = async (req, res) => {
     try {
         const user = res.locals?.data?.data?.user;
