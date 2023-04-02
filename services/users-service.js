@@ -71,7 +71,7 @@ const followUser = async (userId, reqUserId) => {
             (userId) => userId.toString() !== userToFollow._id.toString()
         );
 
-        user.followers = user.followers.filter(
+        userToFollow.followers = userToFollow.followers.filter(
             (userId) => userId.toString() !== user._id.toString()
         );
     // Otherwise, follow them
