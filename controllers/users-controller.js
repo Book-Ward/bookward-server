@@ -17,6 +17,18 @@ const getUserInfo = async (req, res) => {
     }
 };
 
+const getUserInfoById = async (req, res) => {
+    try {
+        const userId = req.params?.userId?.toString();
+
+        const userObj = await userService.getFullUserInfo(userId);
+
+        res.status(200).json(userObj);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};
+
 const saveBook = async (req, res) => {
     try {
         const user = res.locals?.data?.data?.user;
@@ -106,4 +118,5 @@ module.exports = {
     searchUsers,
     getFollowing,
     createUser,
+    getUserInfoById
 };

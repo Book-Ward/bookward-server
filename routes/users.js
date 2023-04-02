@@ -5,6 +5,7 @@ const usersController = require('../controllers/users-controller');
 const recommendationsController = require('../controllers/recommendations-controller');
 
 router.get("/users/info/:userId", supabase_middleware, usersController.getUserInfo);
+router.get("/users/info/get/:userId", usersController.getUserInfoById);
 router.post("/users", usersController.createUser);
 router.post("/users/:bookId/books/saved", supabase_middleware, usersController.saveBook);
 router.post("/users/followed", supabase_middleware, usersController.followUser);
