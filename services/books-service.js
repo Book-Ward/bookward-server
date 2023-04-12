@@ -87,7 +87,7 @@ const getKeyPhrases = async (reviews) => {
         url: process.env.PY_ENGINE_URL + "/key-phrases/extract",
         headers: { "Content-Type": "application/json" },
         data: { text: reviewsList.join(" ").toString() },
-        timeout: 5000,
+        timeout: 2000,
     };
 
     return axios(options)

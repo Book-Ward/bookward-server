@@ -54,7 +54,7 @@ const createUser = async (req, res) => {
             email: req.body?.email?.toString(),
             name: req.body?.username?.toString(),
         }
-x
+
         await userService.saveUser(data);
 
         res.status(200).json({ success: true });
