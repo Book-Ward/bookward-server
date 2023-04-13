@@ -9,6 +9,32 @@ const getBookById = async (bookId) => {
     return book;
 };
 
+const getTopGenres = async (savedBooks) => {
+    const topGenres = {};
+
+    for (let i = 0; i < savedBooks.length; i++) {
+        const book = savedBooks[i];
+
+        const genres = book.genres;
+
+        for (let j = 0; j < genres.length; j++) {
+            const genre = genres[j];
+
+            if (genre in topGenres) {
+                topGenres[genre]++;
+            } else {
+                topGenres[genre] = 1;
+            }
+        }
+    }
+
+    const sortedGenres = Object.keys(topGenres).sort(
+        (a, b) => topGenres[b] - topGenres[a]
+    );
+
+    return sortedGenres.slice(0, 5);
+}
+
 const getHighestRatedBooks = async (user, skip) => {
     const data = await booksRepository.getPopularBooksAggregate(skip, 50);
 
@@ -225,4 +251,5 @@ module.exports = {
     populateSavedBooks,
     populateSavedBooksAggregate,
     getBookById,
+    getTopGenres
 };

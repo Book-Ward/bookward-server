@@ -2,7 +2,9 @@ const userRepository = require("../data-access/repositories/user-repository");
 const booksService = require("./books-service");
 
 const getFullUserInfo = async (userId) => {
-    const user = await userRepository.getFullUserById(userId);
+    let user = await userRepository.getFullUserById(userId);
+
+    user = {...user._doc, topGenres: await booksService.getTopGenres(user.savedBooks)};
 
     booksService.populateSavedBooks(user.savedBooks, user);
 
